@@ -1,17 +1,11 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-21T19:38:35.879Z
+Updated: 2026-05-21T19:38:36.841Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
 
 ## Active Additional Notes
-
-### Slide 1 (slide-01)
-
-- its 1 oh 1 not one hundred and one
-
-- nee
 
 ### Slide 3 (slide-03)
 
