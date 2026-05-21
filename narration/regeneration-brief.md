@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-21T19:35:30.537Z
+Updated: 2026-05-21T19:38:35.879Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -11,13 +11,7 @@ Preserve already-approved conversational presenter style unless a slide note say
 
 - its 1 oh 1 not one hundred and one
 
-- needs to have more spacing in between sentences
-
-- dont mention other ide stuff like claude jsut mention copilot
-
-- the goal is to explain fundamentals so ai coding is more immersive and fun
-
--
+- nee
 
 ### Slide 3 (slide-03)
 
