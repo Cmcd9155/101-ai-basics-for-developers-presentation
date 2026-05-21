@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T19:34:44.284Z",
+  "updatedAt": "2026-05-21T19:34:46.251Z",
   "slides": {
     "slide-01": "- its 1 oh 1 not one hundred and one\n\n- needs to have more spacing in between sentences\n\n- dont mention other ide stuff like claude jsut mention copilot\n\n- the goal is to explain fundamentals so ai coding is more immersive and fun\n\n-\n\n",
     "slide-03": "can we add highlights during the conversation",
@@ -14,6 +14,6 @@
     "slide-12": "vscode steering in your plan was not perfect, you orchestrate\n\ninterrupt, monitor\n\nHuge developer value",
     "slide-13": "90% of AI work is catching hallucination or creating barriers to prevent it\n\nAirplane analogy",
     "slide-14": "Critical: Repos with strong AI boundaries == good\n\nScripts, Skills, Copilot Instructions",
-    "slide-15": "Deep thought"
+    "slide-15": "Deep thought before "
   }
 }
