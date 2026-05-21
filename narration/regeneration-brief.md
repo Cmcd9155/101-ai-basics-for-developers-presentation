@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-21T19:38:46.731Z
+Updated: 2026-05-21T19:38:51.948Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -11,7 +11,7 @@ Preserve already-approved conversational presenter style unless a slide note say
 
 - not perfect
 
-- AI
+- AI guided learning
 
 ### Slide 3 (slide-03)
 
