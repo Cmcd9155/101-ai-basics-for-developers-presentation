@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-21T19:35:27.952Z
+Updated: 2026-05-21T19:35:29.714Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -84,7 +84,7 @@ Scripts, Skills, Copilot Instructions
 
 Deep thought before feature, critical
 
-shape watch prove
+shape, watch prove
 
 ## Current Global Preferences
 
