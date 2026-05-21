@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T19:41:39.646Z",
+  "updatedAt": "2026-05-21T19:41:40.665Z",
   "slides": {
     "slide-01": "- not perfect\n\n- AI guided learning\n\n-mix Vscode + Pres + demo",
     "slide-03": "can we add highlights during the conversation",
@@ -15,6 +15,6 @@
     "slide-13": "90% of AI work is catching hallucination or creating barriers to prevent it\n\nAirplane analogy",
     "slide-14": "Critical: Repos with strong AI boundaries == good\n\nScripts, Skills, Copilot Instructions",
     "slide-15": "Deep thought before feature, critical\n\nshape, watch, prove",
-    "slide-02": "vs"
+    "slide-02": "vsCode"
   }
 }
