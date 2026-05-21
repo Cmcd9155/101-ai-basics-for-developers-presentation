@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>101 AI Basics for Developers | Ara Narration</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="player-shell" id="player-shell">
+      <section class="stage" aria-label="Slide stage">
+        <div class="slide-frame">
+          <img id="slide-image" alt="Current presentation slide" />
+        </div>
+      </section>
+
+      <button id="panel-toggle" class="panel-toggle" type="button" aria-controls="control-panel" aria-expanded="true" title="Hide panel">
+        <span id="panel-toggle-icon" aria-hidden="true">›</span>
+        <span id="panel-toggle-label">Hide panel</span>
+      </button>
+      <div class="floating-controls" role="group" aria-label="Collapsed presentation controls">
+        <button id="floating-previous" class="floating-control" type="button" aria-label="Previous slide" title="Previous slide">
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button id="floating-play" class="floating-control floating-primary" type="button" aria-label="Play presentation" title="Play presentation">
+          <span id="floating-play-icon" aria-hidden="true">▶</span>
+        </button>
+        <button id="floating-next" class="floating-control" type="button" aria-label="Next slide" title="Next slide">
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+
+      <aside class="control-panel" id="control-panel" aria-label="Presentation controls">
+        <div class="deck-meta">
+          <p class="eyebrow">Ara narrated deck</p>
+          <h1 id="deck-title">101 AI Basics for Developers</h1>
+          <p id="deck-status">Loading narration manifest...</p>
+        </div>
+
+        <div class="slide-meta">
+          <p id="slide-count">Slide 0 of 0</p>
+          <h2 id="slide-title">Loading</h2>
+          <p id="slide-caption"></p>
+        </div>
+
+        <div class="timeline" aria-label="Playback progress">
+          <div class="timeline-row">
+            <span id="elapsed">0:00</span>
+            <span id="remaining">0:00</span>
+          </div>
+          <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Seek within current slide audio" />
+        </div>
+
+        <div class="controls">
+          <button id="previous" type="button" aria-label="Previous slide" title="Previous slide">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button id="replay" type="button" aria-label="Replay current slide" title="Replay current slide">
+            <span aria-hidden="true">↺</span>
+          </button>
+          <button id="play" class="primary" type="button" aria-label="Play presentation" title="Play presentation">
+            <span id="play-label">Play</span>
+          </button>
+          <button id="next" type="button" aria-label="Next slide" title="Next slide">
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+
+        <label class="toggle-row">
+          <input id="autoadvance" type="checkbox" />
+          <span>Auto-advance</span>
+        </label>
+
+        <section class="feedback-box" aria-label="Additional notes">
+          <div class="feedback-heading">
+            <div>
+              <p class="eyebrow">Additional notes</p>
+              <h3>For regeneration</h3>
+            </div>
+            <span id="feedback-status">Loading</span>
+          </div>
+          <textarea
+            id="slide-feedback"
+            rows="6"
+            placeholder="Add notes for this slide: pacing, tone, accuracy, what to cut, what to emphasize..."
+          ></textarea>
+        </section>
+
+        <details class="transcript-box">
+          <summary>Current slide transcript</summary>
+          <p id="slide-transcript"></p>
+        </details>
+
+        <audio id="audio" preload="metadata"></audio>
+      </aside>
+    </main>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

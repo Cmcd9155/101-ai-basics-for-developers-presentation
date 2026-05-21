@@ -1,6 +1,6 @@
 import path from "node:path";
 
-const ASSET_DIR = "/Users/chrisdonahue/Documents/Codex/2026-05-21/i-want-to-create-a-presentation/outputs/019e4a38-4026-71e0-9b50-0443ceaa8f49/presentations/101-ai-basics/assets";
+const ASSET_DIR = path.resolve(import.meta.dirname, "../../assets");
 
 const C = {
   ink: "#172033",
@@ -43,154 +43,227 @@ const slides = [
   {
     type: "basics",
     kicker: "LLM basics",
-    title: "An LLM is a probabilistic text engine wrapped in product constraints.",
+    title: "LLMs do three things: read pieces, use context, make a best guess.",
+    image: "llm-context-draft.png",
     points: [
-      ["Tokens", "The model sees chunks of text, code, and symbols, not files the way your editor does."],
-      ["Context", "Only the current assembled context is available at generation time."],
-      ["Uncertainty", "Plausible output is not the same as true output, especially for APIs and repo-specific behavior."],
-      ["Reasoning", "Modern models can plan and inspect, but they still need grounding and verification."],
+      ["Pieces", "The model reads tokens: little chunks of words, code, punctuation, and symbols."],
+      ["Context", "It only knows what is in front of it right now: your prompt, selected code, tool results, and prior messages."],
+      ["Best guess", "It predicts a likely answer. Useful can still be wrong."],
+      ["Your job", "Let it draft, then ground the answer in code, tests, docs, and judgment."],
     ],
-    callout: "Treat model output as a draft from a very fast engineer with incomplete local state.",
+    callout: "Fast draft. Incomplete context. Always verify the important parts.",
   },
   {
     type: "promptSpec",
     kicker: "Prompting as specification",
-    title: "Good agent prompts look like small implementation briefs.",
+    title: "A good prompt tells the agent five simple things.",
+    image: "prompt-to-spec.png",
     leftTitle: "Weak prompt",
     leftBody: "Fix auth bug.",
     rightTitle: "Agent-ready prompt",
     rightBody:
-      "Investigate why expired sessions still pass /api/me. Start by reading auth middleware and session tests. Propose the smallest fix, update tests, and summarize the diff.",
-    rubric: ["Goal", "Scope", "Starting points", "Constraints", "Definition of done"],
+      "Find why expired sessions still pass /api/me. Start in auth middleware and session tests. Make the smallest fix. Update tests. Summarize what changed.",
+    rubric: ["What to fix", "Where to look", "What to avoid", "How to check", "Done"],
+    callout: "A prompt is just a clearer ticket: what to do, where to start, and how we know it worked.",
   },
   {
     type: "repoTraversal",
     kicker: "How Copilot traverses a repo",
-    title: "It does not load the whole repo. It assembles working context.",
-    image: "repo-map.png",
+    title: "Copilot does not carry the whole repo. It packs a working context.",
+    image: "repo-context-assembly.png",
+    contextItems: [
+      ["What you point at", "Opened files, selected code, issue text, logs, and instructions."],
+      ["What it searches for", "Related files, symbols, tests, docs, and matching patterns."],
+      ["What tools return", "Search results, test output, diffs, errors, and prior steps."],
+    ],
+    callout: "If the right file never gets packed, the answer can sound right and still miss your repo.",
+    rule: "Ask for the map before edits: files inspected, tests found, assumptions, and risk.",
     source: "ghIndex, ghContext",
   },
   {
     type: "contextEngineering",
     kicker: "Context engineering",
-    title: "The most useful skill is choosing what the agent should see first.",
-    lanes: [
-      ["Explicit", "Selected files, issue text, pasted logs, failing stack traces."],
-      ["Persistent", ".github/copilot-instructions.md, path instructions, AGENTS.md-style guidance."],
-      ["Retrieved", "Semantic code search, repo index, file search, related symbols."],
-      ["Generated", "Tool results, test output, diffs, plans, summaries, checkpoints."],
+    title: "Do not give it everything. Give it the right starter packet.",
+    image: "context-starter-packet.png",
+    packet: [
+      ["The ask", "What should change, and what should stay alone."],
+      ["The evidence", "Exact files, failing logs, screenshots, errors, or issue text."],
+      ["The rules", "Repo conventions, risky areas, generated files, API boundaries."],
+      ["The check", "Tests to run, behavior to prove, and what counts as done."],
     ],
+    callout: "Better context is not more stuff. It is the few facts that change the next decision.",
+    rule: "Start narrow. Add context when the agent proves it needs more.",
     source: "ghInstructions, ghContext",
   },
   {
     type: "toolLoop",
     kicker: "Tool calling",
-    title: "Agents become useful when the model can ask the environment for facts.",
-    image: "tool-loop.png",
+    title: "Tool calling means: the model asks, the app runs, results come back.",
+    image: "tool-call-reality-loop.png",
     steps: [
-      "Model receives prompt + tool definitions",
-      "Model requests a tool call",
-      "App executes the tool outside the model",
-      "Tool result returns into context",
-      "Model responds or calls another tool",
+      ["Ask", "The model requests a named tool with arguments."],
+      ["Run", "The host app or IDE executes the tool outside the model."],
+      ["Return", "Output comes back into the conversation as context."],
+      ["Decide", "The model uses the result to answer or ask for the next tool."],
     ],
+    callout: "The model is not running tests in its imagination. The host runs the command and feeds back the output.",
+    riskTitle: "Tools have blast radius",
+    risks: ["Read", "Edit", "Run", "Ship"],
+    rule: "Trust tool results more than vibes. Still check permissions, side effects, and weird failures.",
     source: "openaiTools",
   },
   {
     type: "retrieval",
     kicker: "RAG and semantic search",
-    title: "Retrieval is how fresh repo facts get into a bounded context window.",
+    title: "Retrieval finds candidates. You still decide what is true.",
+    image: "retrieval-candidate-map.png",
+    points: [
+      ["Search by meaning", "Good when you do not know the exact file, symbol, or doc name."],
+      ["Treat results as leads", "A close match can still be stale, nearby, or from the wrong path."],
+      ["Read the source", "Open cited files, callers, tests, configs, and docs before trusting it."],
+    ],
+    loop: ["Retrieve", "Read", "Reason", "Verify"],
+    callout: "Retrieval is orientation, not proof.",
+    rule: "Ask the agent to separate found evidence from inferred conclusions.",
     source: "openaiRetrieval",
   },
   {
     type: "mcp",
     kicker: "MCP",
-    title: "MCP is the adapter layer that lets agents discover and invoke external tools.",
+    title: "MCP is a standard plug for agent tools. It is not automatic trust.",
+    image: "mcp-tool-adapters.png",
+    pieces: [
+      ["Client", "The agent app needs a capability."],
+      ["Server", "A tool server describes names, schemas, resources, and results."],
+      ["Host", "The host decides what is allowed and what needs approval."],
+      ["Systems", "Git, docs, data, tickets, deploys, calendars, and more."],
+    ],
+    callout: "MCP standardizes the shape of tool access. Your security model still decides who gets the keys.",
+    rule: "Good MCP setup means clear tools, narrow permissions, logs, and review for risky actions.",
     source: "mcpTools",
   },
   {
     type: "workflowAgent",
     kicker: "Workflow vs agent",
-    title: "The more dynamic the path, the more you need steering and verification.",
+    title: "Use a workflow when the path is known. Use an agent when the path must be found.",
+    image: "workflow-vs-agent-paths.png",
+    choices: [
+      ["Workflow", "Known path", "Same steps each time. Easier to test, audit, and run cheaply."],
+      ["Agent", "Discovered path", "Explores files, tools, logs, and hypotheses as the work unfolds."],
+    ],
+    questions: ["Is the path repeatable?", "Does discovery matter?", "What needs review?"],
+    callout: "Do not call it an agent just because it sounds cooler.",
+    rule: "Repeatability favors workflows. Ambiguity favors agents. Both still need verification.",
     source: "anthropicAgents",
   },
   {
     type: "modes",
     kicker: "IDE agent modes",
-    title: "Choose autonomy based on blast radius, not ambition.",
+    title: "Choose the mode that keeps review possible.",
+    image: "ide-agent-mode-dial.png",
     modes: [
-      ["Ask", "Explain, compare, locate, summarize. No edits."],
-      ["Edit", "Targeted changes in known files. You control the surface."],
-      ["Agent", "Multi-file work with search, commands, tests, and iteration."],
-      ["Plan / Autopilot", "Plan when scope is uncertain. Autopilot only when the task is bounded and tests are clear."],
+      ["Ask", "Understand", "Explain, compare, locate, summarize. No edits."],
+      ["Edit", "Targeted change", "Known files, small surface, focused review."],
+      ["Agent", "Explore + execute", "Search, edit, run commands, test, and iterate."],
+      ["Plan", "Map before code", "Use when scope is foggy or blast radius is high."],
     ],
+    callout: "More autonomy is not better. It is just more blast radius.",
+    checks: ["Scope clear?", "Tests clear?", "Easy to revert?"],
+    rule: "Increase autonomy only when the verification story improves with it.",
     source: "ghModes",
   },
   {
     type: "taskFit",
     kicker: "Task selection",
-    title: "Agents shine on bounded, inspectable work.",
-    good: [
-      "Add a small feature with clear acceptance tests",
-      "Trace a bug from log to codepath",
-      "Refactor a repeated pattern with test coverage",
-      "Generate first-pass tests for existing behavior",
+    title: "Give agents work you can review in one sitting.",
+    image: "task-fit-review-packets.png",
+    callout: "If you cannot review the diff, you did not delegate a task.",
+    fitTitle: "Good fit test",
+    fit: [
+      ["Small surface", "One feature, bug, route, component, or test area."],
+      ["Clear check", "A test, log, screenshot, or manual behavior to verify."],
+      ["Readable diff", "A human can inspect the change without a scavenger hunt."],
     ],
+    badTitle: "Split these first",
     bad: [
-      "Rewrite the architecture",
       "Make it production ready",
       "Fix all flaky tests",
-      "Change auth and billing in one pass",
+      "Rewrite the architecture",
     ],
+    split: ["One behavior", "One area", "One verification"],
+    rule: "Big goal -> small inspectable task -> agent session -> human review.",
   },
   {
     type: "steering",
     kicker: "Steering loop",
-    title: "The best users manage agents like junior teammates with good tools.",
+    title: "Stay in the loop: frame, watch, interrupt, verify.",
+    image: "agent-steering-loop.png",
+    callout: "You are still the engineer. The agent is the worker, not the reviewer.",
     steps: [
-      ["Frame", "Give goal, scope, starting files, and constraints."],
-      ["Observe", "Read plan, tool calls, tests, and assumptions."],
-      ["Interrupt", "Correct direction early when it broadens or guesses."],
-      ["Verify", "Run tests, inspect diffs, check behavior, ask for residual risk."],
+      ["Frame", "Goal, scope, starting files, constraints."],
+      ["Watch", "Plan, files read, tool calls, assumptions."],
+      ["Interrupt", "Stop drift while it is still cheap."],
+      ["Verify", "Diff, tests, behavior, residual risk."],
     ],
+    signals: ["Wrong files", "No tests", "Surprise scope", "Uncited claims"],
+    rule: "Steering early keeps reviews small and sessions trustworthy.",
   },
   {
     type: "failures",
     kicker: "Failure modes",
-    title: "Most agent failures are context failures wearing a confidence costume.",
+    title: "Confidence is not a check. Evidence is.",
+    image: "agent-failure-debugger.png",
+    callout: "Most failures come from missing context, loose scope, or weak verification.",
     failures: [
-      ["Hallucinated APIs", "Counter: ask it to cite the local symbol or docs before coding."],
-      ["Overbroad edits", "Counter: constrain files, public APIs, and migration scope."],
-      ["Stale context", "Counter: restart, summarize, or checkpoint after major pivots."],
-      ["Weak tests", "Counter: require failing test first or explicit manual QA steps."],
-      ["Permission risk", "Counter: keep dangerous commands and secret access gated."],
+      ["Invented API", "Ask for the local symbol or docs."],
+      ["Wide diff", "Constrain files and public APIs."],
+      ["Stale context", "Restart, summarize, or checkpoint."],
+      ["Weak check", "Run focused tests or manual QA."],
+      ["Risky action", "Gate commands, secrets, and deploys."],
     ],
+    questions: ["What evidence?", "What changed?", "What was verified?", "What risk remains?"],
+    rule: "Make the agent show evidence, limits, checks, and leftover risk.",
   },
   {
     type: "teamSetup",
     kicker: "Team setup",
-    title: "Make the repo easier for humans and agents to understand.",
+    title: "Write down the rules the agent should not guess.",
+    image: "repo-operating-manual.png",
+    callout: "Repo instructions are an operating manual, not a policy novel.",
     items: [
-      [".github/copilot-instructions.md", "Broad repo conventions and engineering preferences."],
-      [".github/instructions/*.instructions.md", "Path-specific rules for tests, APIs, frontend, infra."],
-      ["AGENTS.md / CLAUDE.md / GEMINI.md", "Agent-facing project workflow notes when supported."],
-      ["Skills / prompt files", "Repeatable workflows such as bug triage, code review, release notes."],
+      ["Repo rules", "Package manager, generated files, safe commands, style decisions."],
+      ["Path rules", "Tests, APIs, frontend patterns, infra, migrations, security."],
+      ["Workflow recipes", "Bug triage, review prep, release notes, incident checks."],
+      ["Keep out", "Secrets, risky commands, deploys, policy guesses, stale preferences."],
     ],
+    homes: ["Copilot instructions", "AGENTS.md", "Skills / prompts"],
+    rule: "Short, durable instructions make every future session less guessy.",
     source: "ghInstructions",
   },
   {
     type: "checklist",
     kicker: "Practical checklist",
-    title: "A reliable agent session has three checkpoints.",
-    image: "agent-workshop.png",
+    title: "Use one checklist: before, during, after.",
+    image: "agent-session-runbook.png",
+    callout: "Do not wait until the end to become the engineer.",
+    phases: [
+      ["Before", "Shape the task", ["Define done", "Bound the scope", "Name the checks"]],
+      ["During", "Watch direction", ["Read the plan", "Watch files and tools", "Interrupt drift"]],
+      ["After", "Prove it worked", ["Inspect the diff", "Run tests or QA", "Capture learning"]],
+    ],
+    rule: "Before gives direction. During catches drift. After proves the work.",
   },
   {
     type: "exercise",
     kicker: "Closing exercise",
-    title: "Turn a vague request into an agent-ready task.",
+    title: "Rewrite vague work into a task you can verify.",
+    image: "agent-ready-task-worksheet.png",
+    callout: "The prompt is the work ticket. Make it bounded and checkable.",
     vague: "Make the settings page better.",
     improved:
-      "Review the current settings page UX. Identify the smallest accessibility and layout improvements that do not change routes or API behavior. Implement them in the settings component only, add or update focused tests, and summarize before/after behavior.",
+      "Improve settings-page accessibility and spacing only. Start in SettingsPage. Do not change routes or API behavior. Add focused tests. Summarize before/after and remaining risk.",
+    blanks: ["Goal", "Scope", "Start", "Limits", "Check"],
+    rule: "Good agent work is bounded, testable, and reviewed.",
   },
 ];
 
@@ -332,294 +405,517 @@ async function agenda(presentation, ctx, s, n) {
 async function basics(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  s.points.forEach(([head, body], i) => {
-    const x = 74 + (i % 2) * 566;
-    const y = 220 + Math.floor(i / 2) * 156;
-    card(slide, ctx, x, y, 500, 112, head, body, [C.teal, C.blue, C.amber, C.violet][i]);
+  if (s.image) {
+    await image(slide, ctx, s.image, 690, 88, 540, 304);
+    rect(slide, ctx, 690, 88, 540, 304, "#F6F8FB8C", "none");
+    rect(slide, ctx, 690, 88, 540, 304, "#00000000", C.line);
+  }
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 76, 610, 110, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  s.points.slice(0, 3).forEach(([head, body], i) => {
+    const y = 236 + i * 96;
+    rect(slide, ctx, 74, y, 515, 70, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 70, [C.teal, C.blue, C.amber][i], "none");
+    text(slide, ctx, String(i + 1), 96, y + 19, 34, 26, { size: 22, bold: true, color: [C.teal, C.blue, C.amber][i] });
+    text(slide, ctx, head, 148, y + 15, 128, 20, { size: 15.5, bold: true });
+    text(slide, ctx, body, 284, y + 13, 270, 34, { size: 11.2, color: C.muted });
+    if (i < 2) connector(slide, ctx, 330, y + 72, 330, y + 94, [C.teal, C.blue][i]);
   });
-  rect(slide, ctx, 188, 570, 904, 62, "#EEF9F8", C.teal);
-  text(slide, ctx, s.callout, 220, 589, 840, 26, { size: 18, bold: true, color: C.ink, align: "center" });
+
+  const job = s.points[3];
+  rect(slide, ctx, 690, 430, 540, 98, C.dark, "none");
+  rect(slide, ctx, 690, 430, 5, 98, C.violet, "none");
+  text(slide, ctx, job[0], 718, 456, 120, 22, { size: 18, bold: true, color: "#FFFFFF" });
+  text(slide, ctx, job[1], 860, 454, 300, 40, { size: 13, color: "#CBD5E1" });
+
+  rect(slide, ctx, 188, 588, 904, 54, "#EEF9F8", C.teal);
+  text(slide, ctx, s.callout, 220, 604, 840, 24, { size: 17, bold: true, color: C.ink, align: "center" });
   return slide;
 }
 
 async function promptSpec(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  codePanel(slide, ctx, 74, 225, 470, 180, s.leftBody);
-  text(slide, ctx, s.leftTitle, 96, 190, 260, 22, { size: 16, bold: true, color: C.red });
-  codePanel(slide, ctx, 660, 225, 500, 180, s.rightBody);
-  text(slide, ctx, s.rightTitle, 682, 190, 300, 22, { size: 16, bold: true, color: C.green });
-  connector(slide, ctx, 560, 315, 642, 315, C.teal);
-  s.rubric.forEach((item, i) => pill(slide, ctx, item, 170 + i * 184, 500, 140, [C.teal, C.blue, C.amber, C.violet, C.green][i]));
-  text(slide, ctx, "Prompt quality is context selection plus acceptance criteria. The words matter less than the boundaries.", 180, 585, 920, 34, {
-    size: 19,
-    bold: true,
-    align: "center",
-  });
+  if (s.image) {
+    await image(slide, ctx, s.image, 690, 104, 540, 304);
+    rect(slide, ctx, 690, 104, 540, 304, "#F6F8FB80", "none");
+    rect(slide, ctx, 690, 104, 540, 304, "#00000000", C.line);
+  }
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 76, 590, 92, { size: 36, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  text(slide, ctx, s.leftTitle, 96, 205, 200, 22, { size: 16, bold: true, color: C.red });
+  codePanel(slide, ctx, 74, 236, 245, 96, s.leftBody);
+  connector(slide, ctx, 342, 284, 400, 284, C.teal);
+  text(slide, ctx, "Too much room to guess", 410, 272, 160, 22, { size: 12.5, bold: true, color: C.muted });
+
+  text(slide, ctx, s.rightTitle, 96, 378, 260, 22, { size: 16, bold: true, color: C.green });
+  codePanel(slide, ctx, 74, 410, 565, 116, s.rightBody);
+
+  rect(slide, ctx, 690, 448, 540, 80, C.dark, "none");
+  rect(slide, ctx, 690, 448, 5, 80, C.green, "none");
+  text(slide, ctx, s.callout, 720, 470, 460, 32, { size: 15, color: "#E5EEF7", bold: true });
+
+  s.rubric.forEach((item, i) => pill(slide, ctx, item, 154 + i * 196, 584, 142, [C.teal, C.blue, C.amber, C.violet, C.green][i]));
   return slide;
 }
 
 async function repoTraversal(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  await image(slide, ctx, s.image, 714, 80, 500, 300);
-  rect(slide, ctx, 690, 80, 540, 300, "#FFFFFFD9", C.line);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  const left = [
-    ["Repo surface", "Files, folders, symbols, tests, docs, issues"],
-    ["Repo index", "Semantic code search finds relevant code by meaning"],
-    ["Explicit context", "Selected files, prompt text, logs, instructions"],
-    ["Agent tools", "Search, read, run commands, edit, inspect diffs"],
-    ["Context window", "Only assembled state fits; long sessions compact"],
-  ];
-  left.forEach(([head, body], i) => {
-    const y = 200 + i * 82;
-    rect(slide, ctx, 74, y, 420, 52, C.panel, C.line);
-    rect(slide, ctx, 74, y, 4, 52, [C.teal, C.blue, C.amber, C.violet, C.green][i], "none");
-    text(slide, ctx, head, 94, y + 9, 145, 16, { size: 12.5, bold: true });
-    text(slide, ctx, body, 250, y + 9, 210, 30, { size: 10.5, color: C.muted });
-    if (i < left.length - 1) connector(slide, ctx, 284, y + 55, 284, y + 78, [C.teal, C.blue, C.amber, C.violet][i]);
+  await image(slide, ctx, s.image, 642, 92, 588, 320);
+  rect(slide, ctx, 642, 92, 588, 320, "#F6F8FB7A", "none");
+  rect(slide, ctx, 642, 92, 588, 320, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 76, 610, 100, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  s.contextItems.forEach(([head, body], i) => {
+    const y = 222 + i * 94;
+    rect(slide, ctx, 74, y, 520, 68, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 68, [C.teal, C.blue, C.amber][i], "none");
+    text(slide, ctx, String(i + 1), 96, y + 18, 34, 26, { size: 22, bold: true, color: [C.teal, C.blue, C.amber][i] });
+    text(slide, ctx, head, 150, y + 13, 155, 20, { size: 15, bold: true });
+    text(slide, ctx, body, 322, y + 12, 228, 34, { size: 11.2, color: C.muted });
   });
-  rect(slide, ctx, 560, 225, 214, 238, "#F8FAFC", C.line);
-  text(slide, ctx, "Working context", 586, 246, 160, 22, { size: 17, bold: true, align: "center" });
-  text(slide, ctx, "A temporary bundle of retrieved code, explicit prompt material, tool results, and session memory.", 594, 300, 142, 92, {
-    size: 12,
-    color: C.muted,
-    align: "center",
-  });
-  connector(slide, ctx, 498, 405, 558, 346, C.teal);
-  connector(slide, ctx, 774, 346, 846, 346, C.teal);
-  card(slide, ctx, 850, 425, 300, 102, "Careful mental model", "Copilot assembles context. It does not simply paste the whole repository into the model.", C.amber);
+
+  rect(slide, ctx, 690, 450, 540, 92, C.dark, "none");
+  rect(slide, ctx, 690, 450, 5, 92, C.amber, "none");
+  text(slide, ctx, s.callout, 720, 473, 448, 38, { size: 15, color: "#E5EEF7", bold: true });
+
+  rect(slide, ctx, 188, 594, 904, 52, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 230, 609, 820, 22, { size: 15.5, bold: true, color: C.ink, align: "center" });
   return slide;
 }
 
 async function contextEngineering(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  s.lanes.forEach(([head, body], i) => {
-    const x = 92 + i * 284;
-    rect(slide, ctx, x, 222, 226, 270, C.panel, C.line);
-    text(slide, ctx, head, x + 20, 248, 180, 30, { size: 22, bold: true, color: [C.teal, C.blue, C.amber, C.violet][i] });
-    text(slide, ctx, body, x + 20, 322, 180, 96, { size: 14, color: C.muted });
+  await image(slide, ctx, s.image, 540, 70, 690, 390);
+  rect(slide, ctx, 540, 70, 690, 390, "#F6F8FB30", "none");
+  rect(slide, ctx, 540, 70, 690, 390, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 80, 540, 112, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 214, 390, 96, C.dark, "none");
+  rect(slide, ctx, 74, 214, 5, 96, C.teal, "none");
+  text(slide, ctx, s.callout, 104, 237, 310, 42, { size: 16, bold: true, color: "#E5EEF7" });
+
+  s.packet.forEach(([head, body], i) => {
+    const x = 74;
+    const y = 344 + i * 60;
+    const color = [C.teal, C.blue, C.amber, C.green][i];
+    rect(slide, ctx, x, y, 410, 50, C.panel, C.line);
+    rect(slide, ctx, x, y, 5, 50, color, "none");
+    text(slide, ctx, head, x + 22, y + 14, 112, 17, { size: 14.5, bold: true, color });
+    text(slide, ctx, body, x + 150, y + 9, 224, 28, { size: 10.7, color: C.muted });
   });
-  connector(slide, ctx, 204, 520, 1048, 520, C.teal);
-  text(slide, ctx, "Better inputs reduce guessing. Better checkpoints reduce drift.", 260, 566, 760, 34, { size: 21, bold: true, align: "center" });
+
+  rect(slide, ctx, 188, 596, 904, 52, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 260, 612, 760, 20, { size: 15.5, bold: true, color: C.ink, align: "center" });
   return slide;
 }
 
 async function toolLoop(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  await image(slide, ctx, s.image, 0, 0, 1280, 720);
-  rect(slide, ctx, 0, 0, 1280, 720, "#F6F8FBEF", "none");
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  const positions = [
-    [120, 250],
-    [390, 188],
-    [680, 250],
-    [680, 448],
-    [390, 510],
-  ];
-  s.steps.forEach((step, i) => {
-    const [x, y] = positions[i];
-    rect(slide, ctx, x, y, 210, 76, C.panel, C.line);
-    text(slide, ctx, String(i + 1), x + 16, y + 18, 28, 28, { size: 21, bold: true, color: [C.teal, C.blue, C.amber, C.violet, C.green][i] });
-    text(slide, ctx, step, x + 54, y + 18, 132, 36, { size: 12.5, bold: true });
+  await image(slide, ctx, s.image, 560, 90, 670, 366);
+  rect(slide, ctx, 560, 90, 670, 366, "#F6F8FB45", "none");
+  rect(slide, ctx, 560, 90, 670, 366, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 586, 100, { size: 32, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 206, 404, 104, C.dark, "none");
+  rect(slide, ctx, 74, 206, 5, 104, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 230, 312, 46, { size: 15.2, bold: true, color: "#E5EEF7" });
+
+  s.steps.forEach(([head, body], i) => {
+    const x = 74 + i * 286;
+    const y = 494;
+    const color = [C.teal, C.blue, C.amber, C.green][i];
+    rect(slide, ctx, x, y, 244, 78, C.panel, C.line);
+    rect(slide, ctx, x, y, 5, 78, color, "none");
+    text(slide, ctx, String(i + 1), x + 20, y + 18, 26, 24, { size: 20, bold: true, color });
+    text(slide, ctx, head, x + 58, y + 14, 68, 20, { size: 15.5, bold: true, color });
+    text(slide, ctx, body, x + 58, y + 38, 156, 28, { size: 10.3, color: C.muted });
+    if (i < s.steps.length - 1) connector(slide, ctx, x + 244, y + 39, x + 286, y + 39, color);
   });
-  connector(slide, ctx, 330, 288, 390, 232, C.teal);
-  connector(slide, ctx, 600, 232, 680, 288, C.teal);
-  connector(slide, ctx, 785, 326, 785, 448, C.teal);
-  connector(slide, ctx, 680, 486, 600, 548, C.teal);
-  connector(slide, ctx, 390, 548, 225, 326, C.teal);
-  card(slide, ctx, 970, 265, 210, 170, "Engineering rule", "A tool call is not magic. Your app or IDE executes it, with permissions and consequences.", C.amber);
+
+  rect(slide, ctx, 74, 352, 404, 92, "#FFFFFF", C.line);
+  text(slide, ctx, s.riskTitle, 104, 374, 180, 22, { size: 16, bold: true });
+  s.risks.forEach((label, i) => {
+    const x = 284 + i * 46;
+    const color = [C.teal, C.blue, C.amber, C.red][i];
+    rect(slide, ctx, x, 370, 36, 28, color, "none");
+    text(slide, ctx, label, x - 7, 410, 50, 14, { size: 9.5, bold: true, color, align: "center" });
+  });
+
+  rect(slide, ctx, 188, 604, 904, 44, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 244, 617, 792, 18, { size: 14.2, bold: true, align: "center" });
   return slide;
 }
 
 async function retrieval(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  const nodes = [
-    ["Question", 90, 286, C.blue],
-    ["Search query", 300, 286, C.teal],
-    ["Chunks + embeddings", 520, 212, C.violet],
-    ["Relevant snippets", 750, 286, C.amber],
-    ["Grounded answer", 980, 286, C.green],
-  ];
-  nodes.forEach(([label, x, y, color]) => {
-    rect(slide, ctx, x, y, 160, 84, C.panel, color);
-    text(slide, ctx, label, x + 18, y + 30, 124, 24, { size: 15, bold: true, color, align: "center" });
+  await image(slide, ctx, s.image, 548, 104, 682, 356);
+  rect(slide, ctx, 548, 104, 682, 356, "#F6F8FB3A", "none");
+  rect(slide, ctx, 548, 104, 682, 356, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 470, 112, { size: 32, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 216, 392, 86, C.dark, "none");
+  rect(slide, ctx, 74, 216, 5, 86, C.violet, "none");
+  text(slide, ctx, s.callout, 104, 245, 300, 24, { size: 18, bold: true, color: "#E5EEF7" });
+
+  s.points.forEach(([head, body], i) => {
+    const y = 338 + i * 74;
+    const color = [C.teal, C.amber, C.green][i];
+    rect(slide, ctx, 74, y, 426, 54, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 54, color, "none");
+    text(slide, ctx, head, 98, y + 13, 142, 18, { size: 14.5, bold: true, color });
+    text(slide, ctx, body, 250, y + 10, 210, 28, { size: 10.5, color: C.muted });
   });
-  connector(slide, ctx, 250, 328, 300, 328, C.teal);
-  connector(slide, ctx, 460, 328, 520, 254, C.teal);
-  connector(slide, ctx, 680, 254, 750, 328, C.teal);
-  connector(slide, ctx, 910, 328, 980, 328, C.teal);
-  rect(slide, ctx, 520, 430, 160, 84, "#EEF2FF", C.violet);
-  text(slide, ctx, "Vector store", 542, 462, 116, 20, { size: 15, bold: true, color: C.violet, align: "center" });
-  connector(slide, ctx, 600, 296, 600, 430, C.violet);
-  text(slide, ctx, "Retrieval helps with facts, but it can still retrieve the wrong fact. Always inspect citations or files for important changes.", 188, 584, 904, 40, {
-    size: 18,
-    bold: true,
-    align: "center",
+
+  s.loop.forEach((label, i) => {
+    const x = 214 + i * 214;
+    const color = [C.teal, C.blue, C.amber, C.green][i];
+    rect(slide, ctx, x, 574, 136, 38, "#FFFFFF", color);
+    text(slide, ctx, label, x + 18, 586, 100, 16, { size: 12.5, bold: true, color, align: "center" });
+    if (i < s.loop.length - 1) connector(slide, ctx, x + 136, 593, x + 214, 593, C.teal);
   });
+
+  rect(slide, ctx, 188, 632, 904, 36, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 250, 642, 780, 16, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function mcp(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  rect(slide, ctx, 92, 274, 260, 150, C.dark, "none");
-  text(slide, ctx, "Agent client", 132, 310, 180, 24, { size: 22, bold: true, color: "#FFFFFF", align: "center" });
-  text(slide, ctx, "Model + session + tool choice", 132, 354, 180, 38, { size: 12.5, color: "#CBD5E1", align: "center" });
-  rect(slide, ctx, 510, 248, 250, 202, "#EEF9F8", C.teal);
-  text(slide, ctx, "MCP server", 552, 286, 160, 24, { size: 24, bold: true, color: C.teal, align: "center" });
-  text(slide, ctx, "Named tools\nSchemas\nResource links\nTool results", 552, 332, 160, 80, { size: 13, color: C.muted, align: "center" });
-  const targets = [
-    ["Database", 925, 200, C.blue],
-    ["GitHub", 925, 310, C.dark2],
-    ["Calendar", 925, 420, C.amber],
-  ];
-  targets.forEach(([label, x, y, color]) => {
-    rect(slide, ctx, x, y, 210, 86, C.panel, C.line);
-    rect(slide, ctx, x, y, 5, 86, color, "none");
-    text(slide, ctx, label, x + 22, y + 24, 150, 22, { size: 17, bold: true });
-    text(slide, ctx, "External system", x + 22, y + 56, 150, 18, { size: 11, color: C.muted });
+  await image(slide, ctx, s.image, 510, 88, 720, 372);
+  rect(slide, ctx, 510, 88, 720, 372, "#F6F8FB3A", "none");
+  rect(slide, ctx, 510, 88, 720, 372, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 530, 112, { size: 32, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 218, 390, 100, C.dark, "none");
+  rect(slide, ctx, 74, 218, 5, 100, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 241, 300, 44, { size: 15.3, bold: true, color: "#E5EEF7" });
+
+  s.pieces.forEach(([head, body], i) => {
+    const x = 74 + (i % 2) * 250;
+    const y = 356 + Math.floor(i / 2) * 82;
+    const color = [C.teal, C.blue, C.amber, C.green][i];
+    rect(slide, ctx, x, y, 222, 62, C.panel, C.line);
+    rect(slide, ctx, x, y, 5, 62, color, "none");
+    text(slide, ctx, head, x + 20, y + 12, 76, 18, { size: 14.5, bold: true, color });
+    text(slide, ctx, body, x + 20, y + 34, 172, 18, { size: 9.3, color: C.muted });
   });
-  connector(slide, ctx, 352, 350, 510, 350, C.teal);
-  rect(slide, ctx, 760, 348, 92, 4, C.teal, "none");
-  rect(slide, ctx, 850, 240, 4, 224, C.teal, "none");
-  connector(slide, ctx, 852, 240, 925, 240, C.teal);
-  connector(slide, ctx, 852, 350, 925, 350, C.teal);
-  connector(slide, ctx, 852, 460, 925, 460, C.teal);
-  text(slide, ctx, "The protocol standardizes discovery and invocation. Your security model still has to decide what tools are allowed.", 188, 584, 904, 40, {
-    size: 18,
-    bold: true,
-    align: "center",
+
+  const flow = ["Describe", "Approve", "Invoke", "Return"];
+  flow.forEach((label, i) => {
+    const x = 188 + i * 226;
+    const color = [C.teal, C.amber, C.blue, C.green][i];
+    rect(slide, ctx, x, 580, 136, 38, "#FFFFFF", color);
+    text(slide, ctx, label, x + 18, 592, 100, 16, { size: 12.5, bold: true, color, align: "center" });
+    if (i < flow.length - 1) connector(slide, ctx, x + 136, 599, x + 226, 599, C.teal);
   });
+
+  rect(slide, ctx, 188, 638, 904, 36, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 246, 648, 786, 16, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function workflowAgent(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  card(slide, ctx, 110, 230, 470, 250, "Workflow", "Predefined code path orchestrates model and tools. Great for repeatable, auditable processes.", C.blue);
-  card(slide, ctx, 700, 230, 470, 250, "Agent", "Model dynamically chooses process and tool use. Great for ambiguous tasks that need exploration.", C.teal);
-  text(slide, ctx, "Use workflows when the path is known. Use agents when discovery is part of the job.", 180, 570, 920, 34, {
-    size: 21,
-    bold: true,
-    align: "center",
+  await image(slide, ctx, s.image, 540, 94, 690, 358);
+  rect(slide, ctx, 540, 94, 690, 358, "#F6F8FB36", "none");
+  rect(slide, ctx, 540, 94, 690, 358, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 536, 120, { size: 31, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 224, 390, 92, C.dark, "none");
+  rect(slide, ctx, 74, 224, 5, 92, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 252, 300, 30, { size: 17, bold: true, color: "#E5EEF7" });
+
+  s.choices.forEach(([head, tag, body], i) => {
+    const y = 354 + i * 104;
+    const color = [C.blue, C.teal][i];
+    rect(slide, ctx, 74, y, 430, 76, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 76, color, "none");
+    text(slide, ctx, head, 100, y + 15, 132, 20, { size: 17, bold: true, color });
+    text(slide, ctx, tag, 245, y + 17, 110, 16, { size: 11, bold: true, color });
+    text(slide, ctx, body, 100, y + 43, 340, 20, { size: 10.8, color: C.muted });
   });
+
+  s.questions.forEach((question, i) => {
+    const x = 196 + i * 296;
+    const color = [C.blue, C.teal, C.amber][i];
+    rect(slide, ctx, x, 574, 196, 42, "#FFFFFF", color);
+    text(slide, ctx, question, x + 14, 587, 168, 16, { size: 11.3, bold: true, color, align: "center" });
+  });
+
+  rect(slide, ctx, 188, 638, 904, 36, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 246, 648, 786, 16, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function modes(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  s.modes.forEach(([head, body], i) => {
-    const x = 88 + (i % 2) * 560;
-    const y = 220 + Math.floor(i / 2) * 154;
-    card(slide, ctx, x, y, 480, 112, head, body, [C.blue, C.teal, C.amber, C.violet][i]);
+  await image(slide, ctx, s.image, 520, 90, 710, 360);
+  rect(slide, ctx, 520, 90, 710, 360, "#F6F8FB32", "none");
+  rect(slide, ctx, 520, 90, 710, 360, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 520, 92, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 210, 390, 88, C.dark, "none");
+  rect(slide, ctx, 74, 210, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 236, 300, 30, { size: 17, bold: true, color: "#E5EEF7" });
+
+  s.modes.forEach(([head, tag, body], i) => {
+    const y = 332 + i * 62;
+    const color = [C.blue, C.teal, C.amber, C.violet][i];
+    rect(slide, ctx, 74, y, 436, 48, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 48, color, "none");
+    text(slide, ctx, head, 98, y + 12, 64, 17, { size: 14.5, bold: true, color });
+    text(slide, ctx, tag, 172, y + 13, 108, 14, { size: 10.2, bold: true, color });
+    text(slide, ctx, body, 292, y + 9, 178, 24, { size: 9.6, color: C.muted });
   });
-  text(slide, ctx, "More autonomy means more need for tests, permissions, and review.", 256, 585, 760, 34, { size: 21, bold: true, align: "center" });
+
+  s.checks.forEach((check, i) => {
+    const x = 214 + i * 284;
+    const color = [C.blue, C.teal, C.amber][i];
+    rect(slide, ctx, x, 586, 172, 38, "#FFFFFF", color);
+    text(slide, ctx, check, x + 16, 598, 140, 16, { size: 11.8, bold: true, color, align: "center" });
+  });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 260, 650, 760, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function taskFit(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  text(slide, ctx, "Good fit", 132, 205, 300, 28, { size: 24, bold: true, color: C.green });
-  text(slide, ctx, "Bad fit", 720, 205, 300, 28, { size: 24, bold: true, color: C.red });
-  s.good.forEach((item, i) => compactRow(slide, ctx, 110, 252 + i * 78, 445, i + 1, item, C.green));
-  s.bad.forEach((item, i) => compactRow(slide, ctx, 700, 252 + i * 78, 445, i + 1, item, C.red));
+  await image(slide, ctx, s.image, 562, 88, 650, 330);
+  rect(slide, ctx, 562, 88, 650, 330, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 515, 92, { size: 33, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 212, 420, 88, C.dark, "none");
+  rect(slide, ctx, 74, 212, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 236, 322, 34, { size: 17, bold: true, color: "#E5EEF7" });
+
+  text(slide, ctx, s.fitTitle, 84, 332, 300, 22, { size: 18, bold: true, color: C.green });
+  s.fit.forEach(([head, body], i) => {
+    const y = 370 + i * 58;
+    rect(slide, ctx, 74, y, 458, 46, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 46, [C.green, C.teal, C.blue][i], "none");
+    text(slide, ctx, head, 98, y + 10, 118, 16, { size: 13, bold: true, color: [C.green, C.teal, C.blue][i] });
+    text(slide, ctx, body, 228, y + 8, 260, 24, { size: 10.2, color: C.muted });
+  });
+
+  rect(slide, ctx, 590, 456, 254, 118, "#FFF7ED", C.amber);
+  text(slide, ctx, s.badTitle, 614, 478, 196, 20, { size: 16, bold: true, color: C.amber });
+  s.bad.forEach((item, i) => {
+    text(slide, ctx, item, 614, 512 + i * 22, 196, 16, { size: 10.8, color: C.ink, bold: i === 0 });
+  });
+
+  s.split.forEach((item, i) => {
+    const x = 872 + i * 105;
+    const color = [C.green, C.teal, C.blue][i];
+    rect(slide, ctx, x, 462, 92, 88, "#FFFFFF", color);
+    text(slide, ctx, String(i + 1).padStart(2, "0"), x + 14, 478, 64, 16, { size: 11, bold: true, color });
+    text(slide, ctx, item, x + 14, 508, 64, 24, { size: 12, bold: true, color: C.ink, align: "center" });
+  });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 262, 650, 756, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function steering(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
+  await image(slide, ctx, s.image, 548, 84, 664, 314);
+  rect(slide, ctx, 548, 84, 664, 314, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 78, 520, 96, { size: 33, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 216, 420, 90, C.dark, "none");
+  rect(slide, ctx, 74, 216, 5, 90, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 239, 320, 36, { size: 17, bold: true, color: "#E5EEF7" });
+
   s.steps.forEach(([head, body], i) => {
-    const x = 116 + i * 278;
-    rect(slide, ctx, x, 278, 210, 132, C.panel, C.line);
-    text(slide, ctx, head, x + 22, 304, 166, 28, { size: 22, bold: true, color: [C.blue, C.teal, C.amber, C.green][i], align: "center" });
-    text(slide, ctx, body, x + 24, 352, 162, 42, { size: 12, color: C.muted, align: "center" });
-    if (i < s.steps.length - 1) connector(slide, ctx, x + 210, 344, x + 278, 344, C.teal);
+    const x = 76 + i * 287;
+    const color = [C.blue, C.teal, C.amber, C.green][i];
+    rect(slide, ctx, x, 442, 218, 84, C.panel, C.line);
+    rect(slide, ctx, x, 442, 5, 84, color, "none");
+    text(slide, ctx, String(i + 1).padStart(2, "0"), x + 22, 456, 42, 16, { size: 10.5, bold: true, color });
+    text(slide, ctx, head, x + 22, 478, 92, 22, { size: 18, bold: true, color });
+    text(slide, ctx, body, x + 116, 464, 78, 44, { size: 9.8, color: C.muted });
+    if (i < s.steps.length - 1) connector(slide, ctx, x + 218, 484, x + 287, 484, C.teal);
   });
-  text(slide, ctx, "Interrupting early is cheaper than reviewing a confident wrong diff.", 236, 540, 800, 34, { size: 22, bold: true, align: "center" });
+
+  text(slide, ctx, "Interrupt when you see:", 90, 346, 200, 20, { size: 15.5, bold: true, color: C.ink });
+  s.signals.forEach((signal, i) => {
+    const x = 90 + i * 108;
+    rect(slide, ctx, x, 374, 92, 30, "#FFFFFF", [C.blue, C.teal, C.amber, C.red][i]);
+    text(slide, ctx, signal, x + 8, 384, 76, 10, { size: 8.8, bold: true, color: [C.blue, C.teal, C.amber, C.red][i], align: "center" });
+  });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 300, 650, 680, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function failures(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
+  await image(slide, ctx, s.image, 542, 86, 674, 318);
+  rect(slide, ctx, 542, 86, 674, 318, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 80, 500, 82, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 208, 420, 88, C.dark, "none");
+  rect(slide, ctx, 74, 208, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 232, 322, 36, { size: 16.5, bold: true, color: "#E5EEF7" });
+
   s.failures.forEach(([head, body], i) => {
-    const x = i < 3 ? 90 + i * 365 : 270 + (i - 3) * 365;
-    const y = i < 3 ? 216 : 418;
-    card(slide, ctx, x, y, 300, 128, head, body, [C.red, C.amber, C.violet, C.blue, C.green][i]);
+    const x = 74 + i * 222;
+    const y = 440;
+    const color = [C.red, C.amber, C.violet, C.blue, C.green][i];
+    rect(slide, ctx, x, y, 184, 78, C.panel, C.line);
+    rect(slide, ctx, x, y, 5, 78, color, "none");
+    text(slide, ctx, head, x + 20, y + 14, 142, 18, { size: 15, bold: true, color });
+    text(slide, ctx, body, x + 20, y + 42, 136, 22, { size: 9.8, color: C.muted });
   });
+
+  text(slide, ctx, "Ask before you trust it:", 88, 332, 230, 20, { size: 15.5, bold: true, color: C.ink });
+  s.questions.forEach((question, i) => {
+    const x = 88 + i * 112;
+    const color = [C.blue, C.teal, C.amber, C.red][i];
+    rect(slide, ctx, x, 362, 96, 34, "#FFFFFF", color);
+    text(slide, ctx, question, x + 8, 374, 80, 10, { size: 8.8, bold: true, color, align: "center" });
+  });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 300, 650, 680, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function teamSetup(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
+  await image(slide, ctx, s.image, 550, 86, 662, 318);
+  rect(slide, ctx, 550, 86, 662, 318, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 80, 520, 88, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 210, 420, 88, C.dark, "none");
+  rect(slide, ctx, 74, 210, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 234, 320, 34, { size: 17, bold: true, color: "#E5EEF7" });
+
   s.items.forEach(([head, body], i) => {
-    const y = 220 + i * 86;
-    rect(slide, ctx, 110, y, 1060, 58, C.panel, C.line);
-    text(slide, ctx, head, 136, y + 17, 310, 20, { size: 14, mono: true, bold: true, color: [C.blue, C.teal, C.amber, C.violet][i] });
-    text(slide, ctx, body, 500, y + 15, 550, 24, { size: 14, color: C.muted });
+    const y = 342 + i * 56;
+    const color = [C.blue, C.teal, C.green, C.amber][i];
+    rect(slide, ctx, 74, y, 482, 44, C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 44, color, "none");
+    text(slide, ctx, head, 98, y + 10, 112, 16, { size: 13.2, bold: true, color });
+    text(slide, ctx, body, 226, y + 8, 290, 22, { size: 9.7, color: C.muted });
   });
-  text(slide, ctx, "This is documentation with operational leverage: humans read it occasionally; agents read it every session.", 196, 592, 880, 34, {
-    size: 20,
-    bold: true,
-    align: "center",
+
+  text(slide, ctx, "Good places for durable rules:", 618, 440, 320, 20, { size: 15.5, bold: true, color: C.ink });
+  s.homes.forEach((home, i) => {
+    const x = 618 + i * 184;
+    const color = [C.blue, C.teal, C.violet][i];
+    rect(slide, ctx, x, 474, 154, 44, "#FFFFFF", color);
+    text(slide, ctx, home, x + 12, 490, 130, 12, { size: 9.8, bold: true, color, align: "center" });
   });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 300, 650, 680, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function checklist(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
-  await image(slide, ctx, s.image, 0, 0, 1280, 720);
-  rect(slide, ctx, 0, 0, 1280, 720, "#FFFFFFE8", "none");
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  const columns = [
-    ["Before", ["Define done", "Name files or areas", "State constraints", "Pick mode"]],
-    ["During", ["Review plan", "Watch tool calls", "Interrupt drift", "Ask for assumptions"]],
-    ["After", ["Inspect diff", "Run tests", "Check edge cases", "Capture learnings"]],
-  ];
-  columns.forEach(([head, items], i) => {
-    const x = 124 + i * 350;
-    rect(slide, ctx, x, 232, 280, 310, C.panel, C.line);
-    text(slide, ctx, head, x + 26, 260, 220, 30, { size: 25, bold: true, color: [C.blue, C.teal, C.green][i], align: "center" });
+  bg(slide, ctx);
+  await image(slide, ctx, s.image, 548, 86, 664, 318);
+  rect(slide, ctx, 548, 86, 664, 318, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 80, 520, 88, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 210, 420, 88, C.dark, "none");
+  rect(slide, ctx, 74, 210, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 237, 320, 32, { size: 17, bold: true, color: "#E5EEF7" });
+
+  s.phases.forEach(([head, tag, items], i) => {
+    const x = 74 + i * 385;
+    const color = [C.blue, C.teal, C.green][i];
+    rect(slide, ctx, x, 436, 306, 142, C.panel, C.line);
+    rect(slide, ctx, x, 436, 5, 142, color, "none");
+    text(slide, ctx, head, x + 24, 456, 120, 24, { size: 21, bold: true, color });
+    text(slide, ctx, tag, x + 160, 461, 110, 14, { size: 10.5, bold: true, color });
     items.forEach((item, j) => {
-      text(slide, ctx, "[ ]", x + 42, 332 + j * 42, 34, 18, { size: 13, mono: true, color: C.soft });
-      text(slide, ctx, item, x + 82, 330 + j * 42, 150, 20, { size: 14, bold: true });
+      text(slide, ctx, "[ ]", x + 26, 502 + j * 25, 28, 14, { size: 10.5, mono: true, color: C.soft });
+      text(slide, ctx, item, x + 62, 500 + j * 25, 178, 16, { size: 11.8, bold: true, color: C.ink });
     });
   });
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 316, 650, 648, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 
 async function exercise(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  title(slide, ctx, s.kicker, s.title, s.source, n);
-  text(slide, ctx, "Vague", 110, 204, 160, 26, { size: 20, bold: true, color: C.red });
-  codePanel(slide, ctx, 110, 244, 430, 120, s.vague);
-  text(slide, ctx, "Agent-ready", 700, 204, 220, 26, { size: 20, bold: true, color: C.green });
-  codePanel(slide, ctx, 700, 244, 430, 194, s.improved);
-  connector(slide, ctx, 555, 304, 680, 304, C.teal);
-  const prompts = ["What is the smallest useful scope?", "What should the agent inspect first?", "How will we know it worked?"];
-  prompts.forEach((p, i) => pill(slide, ctx, p, 180 + i * 300, 535, 250, [C.blue, C.teal, C.amber][i]));
-  text(slide, ctx, "Your job is to keep the agent inside a useful problem shape.", 270, 604, 740, 34, { size: 22, bold: true, align: "center" });
+  await image(slide, ctx, s.image, 548, 86, 664, 318);
+  rect(slide, ctx, 548, 86, 664, 318, "#00000000", C.line);
+  text(slide, ctx, s.kicker.toUpperCase(), 54, 42, 540, 20, { size: 10.5, color: C.teal, bold: true });
+  text(slide, ctx, s.title, 54, 80, 520, 88, { size: 34, bold: true, face: ctx.fonts.title });
+  footer(slide, ctx, s.source, n);
+
+  rect(slide, ctx, 74, 210, 420, 88, C.dark, "none");
+  rect(slide, ctx, 74, 210, 5, 88, C.amber, "none");
+  text(slide, ctx, s.callout, 104, 234, 320, 34, { size: 17, bold: true, color: "#E5EEF7" });
+
+  text(slide, ctx, "Vague ask", 74, 428, 160, 22, { size: 17, bold: true, color: C.red });
+  codePanel(slide, ctx, 74, 462, 300, 74, s.vague);
+
+  s.blanks.forEach((item, i) => {
+    const x = 410 + (i % 3) * 94;
+    const y = i < 3 ? 454 : 516;
+    const color = [C.blue, C.teal, C.green, C.amber, C.violet][i];
+    rect(slide, ctx, x, y, 78, 38, "#FFFFFF", color);
+    text(slide, ctx, item, x + 8, y + 13, 62, 10, { size: 9.4, bold: true, color, align: "center" });
+  });
+  connector(slide, ctx, 380, 499, 404, 499, C.teal);
+  connector(slide, ctx, 686, 499, 716, 499, C.teal);
+
+  text(slide, ctx, "Agent-ready task", 724, 428, 220, 22, { size: 17, bold: true, color: C.green });
+  codePanel(slide, ctx, 724, 462, 430, 112, s.improved);
+
+  rect(slide, ctx, 188, 642, 904, 32, "#EEF9F8", C.teal);
+  text(slide, ctx, s.rule, 330, 650, 620, 14, { size: 13.2, bold: true, align: "center" });
   return slide;
 }
 

@@ -10,7 +10,50 @@ Practical 30-minute workshop deck for engineers learning how to use AI agents in
 - Slide previews: [`previews/`](previews/)
 - Contact sheet: [`qa/contact-sheet.png`](qa/contact-sheet.png)
 - Generated supporting visuals: [`assets/`](assets/)
+- Narration script, audio, and player manifest: [`narration/`](narration/)
+- Local narrated player: [`player/`](player/)
 - Presentation source modules: [`source/slides/`](source/slides/)
+
+## Run Locally
+
+This repo includes the rendered deck artifacts and the generated Ara narration
+audio, so you can run the presentation player without regenerating anything.
+
+Requirements:
+
+- Node.js 22 or newer
+- GitHub push access if you want Additional notes to sync back to the repo
+
+Start the player:
+
+```bash
+npm run player:serve -- --port 4173
+```
+
+Open:
+
+```text
+http://127.0.0.1:4173/player/
+```
+
+The player reads slide previews from `previews/`, audio from
+`narration/audio/`, and timing from `narration/manifest.json`.
+
+Additional notes typed in the player are saved to:
+
+- `narration/feedback.json`
+- `narration/feedback-events.jsonl`
+- `narration/regeneration-brief.md`
+
+When the player is served from this repo, saving Additional notes also commits
+and pushes just those notes artifacts to the current Git branch.
+
+Useful checks:
+
+```bash
+npm run narration:dry-run
+npm run feedback:sync
+```
 
 ## Workshop Arc
 

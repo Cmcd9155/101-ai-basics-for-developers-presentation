@@ -1,0 +1,13 @@
+{
+  "name": "101-ai-basics-for-developers-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "narration:dry-run": "node scripts/generate-ara-narration.mjs --dry-run",
+    "narration:generate": "node scripts/generate-ara-narration.mjs --all",
+    "narration:regenerate": "node scripts/generate-ara-narration.mjs --all --force",
+    "feedback:sync": "node scripts/sync-feedback-artifacts.mjs",
+    "player:serve": "node scripts/serve-player.mjs"
+  }
+}
