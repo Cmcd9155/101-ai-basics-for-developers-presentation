@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T19:38:45.847Z",
+  "updatedAt": "2026-05-21T19:38:46.731Z",
   "slides": {
-    "slide-01": "- not perfect",
+    "slide-01": "- not perfect\n\n- AI",
     "slide-03": "can we add highlights during the conversation",
     "slide-05": "- Helix Agent (Curated Starter Pack)",
     "slide-06": "- Show tools on vscode",
