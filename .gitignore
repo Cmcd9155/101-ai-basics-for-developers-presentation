@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+*.key
+*.pem
+layout/
+tmp/
+dist/
