@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T14:58:43.253Z",
+  "updatedAt": "2026-05-27T14:58:43.797Z",
   "slides": {
     "slide-01": "This is where AI gets very powerful across teams",
     "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated",
@@ -9,6 +9,6 @@
     "slide-05": "* Hard boundaries/scripts are often better if same process always\n* Soft boundaries are more complicated but more dynamic/flexible\n* good harness context can keep the model focused (this is an art form)\n",
     "slide-06": "* Skills, custom workflows conditionally added\n* Keeps agents context clean for work unrelated to skill\n* Skills are an art form, complex",
     "slide-07": "* high level think. Anything im waisting time doing, how can i make a skill to do it for me\n*AI can do more than you think",
-    "slide-10": "* j"
+    "slide-10": "* "
   }
 }
