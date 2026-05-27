@@ -74,10 +74,10 @@ const slides = [
     fileLabel: ".github/copilot-instructions.md",
     callout: "Write the rules the agent should not guess every time.",
     rows: [
-      ["Commands", "Package manager, install, build, lint, test, and safe local checks."],
-      ["Conventions", "Architecture patterns, preferred helpers, naming, errors, and logging."],
-      ["Boundaries", "Generated files, risky paths, public APIs, secrets, migrations, and deploys."],
-      ["Done", "What must be verified before Copilot says the work is complete."],
+      ["Commands", "Install, build, lint, test, and local checks."],
+      ["Conventions", "Patterns, helpers, naming, errors, and logging."],
+      ["Boundaries", "Risky paths, APIs, secrets, migrations, and deploys."],
+      ["Done", "Required checks before Copilot says complete."],
     ],
   },
   {
@@ -93,8 +93,8 @@ const slides = [
     ],
     buckets: [
       ["Allowed", "Read code, inspect tests, update focused local files."],
-      ["Ask first", "Install packages, delete files, run migrations, change public APIs."],
-      ["Never alone", "Touch secrets, production data, releases, or protected branches."],
+      ["Ask first", "Install packages, delete files, migrations, or public API changes."],
+      ["Never alone", "Secrets, production data, releases, or protected branches."],
     ],
     rule: "Boundaries make Copilot safer and make the search space smaller.",
   },
@@ -121,7 +121,7 @@ const slides = [
       ["Bug triage", "Start with evidence, owner, repro, and one likely surface."],
       ["Migration safety", "Dry-run first. Human approval before data-changing commands."],
       ["UI testing", "Run the app, inspect the screen, capture the visual result."],
-      ["PR review", "Summarize evidence, changed behavior, checks, and remaining risk."],
+      ["PR review", "Summarize evidence, behavior changes, checks, and risk."],
     ],
     rule: "If the team repeats a move, make it part of the harness.",
   },
@@ -133,9 +133,9 @@ const slides = [
     callout: "A named script is better than asking the agent to invent the right command.",
     commands: [
       ["test:changed", "Run only tests related to changed files."],
-      ["agent:verify", "Bundle typecheck, lint report, focused tests, and smoke checks."],
+      ["agent:verify", "Bundle typecheck, lint report, tests, and smoke checks."],
       ["smoke:local", "Open the app path and confirm the main behavior still works."],
-      ["check:pr", "Collect the review evidence a human needs before merging."],
+      ["check:pr", "Collect review evidence before merging."],
     ],
   },
   {
@@ -146,7 +146,7 @@ const slides = [
     callout: "Not every repo has hard lint gates. Agents still need feedback.",
     contrast: [
       ["Hard gate", "Blocks merge when the repo already enforces the rule."],
-      ["Soft report", "Returns warnings so Copilot can fix obvious issues without stopping the whole session."],
+      ["Soft report", "Returns warnings so Copilot can fix obvious issues without stopping."],
     ],
     examples: ["unused code", "unsafe any", "accessibility hints", "slow tests", "wide diff"],
     rule: "A soft check is not permission to ignore quality. It is a way to surface quality earlier.",
@@ -293,9 +293,9 @@ function card(slide, ctx, x, y, w, h, headingValue, body, accent = C.teal, opts 
   const padX = opts.padX ?? 22;
   const padTop = opts.padTop ?? 16;
   const gap = opts.gap ?? 8;
-  const padBottom = opts.padBottom ?? 14;
+  const padBottom = opts.padBottom ?? 26;
   const headingSize = opts.headingSize ?? 17;
-  const bodySize = opts.bodySize ?? (h < 86 ? 11.2 : h < 104 ? 11.7 : 12.5);
+  const bodySize = opts.bodySize ?? (h < 86 ? 11 : h < 104 ? 11.4 : 12.2);
   const headingH = opts.headingH ?? Math.max(24, headingSize * 1.45);
   const contentX = x + padX;
   const contentW = w - padX * 2;
