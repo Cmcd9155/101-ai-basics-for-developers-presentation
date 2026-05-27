@@ -174,7 +174,7 @@ const slides = [
       ["Missing context", "Add an instruction or path rule."],
       ["Wrong command", "Add or document a script."],
       ["Weak proof", "Add a focused test or smoke check."],
-      ["Bad review", "Add a checklist or diagnostic skill."],
+      ["Bad review", "Add checklist or diagnostic skill."],
     ],
     rule: "Do not only fix the prompt. Fix the system that shaped the prompt.",
   },
@@ -472,7 +472,7 @@ async function learning(presentation, ctx, s, n) {
     text(slide, ctx, item, x + 10, 247, 88, 16, { size: 12.5, bold: true, color: [C.red, C.amber, C.teal, C.green][i], align: "center" });
     if (i < s.loop.length - 1) text(slide, ctx, ">", x + 116, 244, 16, 18, { size: 14, bold: true, color: C.teal });
   });
-  s.fixes.forEach(([head, body], i) => card(slide, ctx, 74 + (i % 2) * 268, 326 + Math.floor(i / 2) * 96, 230, 76, head, body, [C.teal, C.blue, C.amber, C.green][i]));
+  s.fixes.forEach(([head, body], i) => card(slide, ctx, 74 + (i % 2) * 268, 318 + Math.floor(i / 2) * 108, 230, 92, head, body, [C.teal, C.blue, C.amber, C.green][i]));
   rect(slide, ctx, 188, 606, 904, 44, "#EEF9F8", C.teal);
   text(slide, ctx, s.rule, 260, 619, 760, 18, { size: 14.5, bold: true, align: "center" });
   return slide;
