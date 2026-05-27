@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T14:48:26.930Z
+Updated: 2026-05-27T14:48:27.905Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -30,7 +30,7 @@ This is where AI gets very powerful across teams
 ### Slide 5 (slide-05)
 
 * Hard boundaries are often better
-* Soft boundaries are more complicated b
+* Soft boundaries are more complicated but
 
 ## Current Global Preferences
 
