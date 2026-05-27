@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T15:00:13.306Z
+Updated: 2026-05-27T15:00:18.130Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -47,6 +47,7 @@ This is where AI gets very powerful across teams
 ### Slide 10 (slide-10)
 
 * sometimes you have test that take minutes, if they take seconds development workflow is better
+* you can run ai's on output checks to look for issues. explain model weights and how they are set here.
 
 ## Current Global Preferences
 
