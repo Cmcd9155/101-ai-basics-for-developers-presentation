@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T14:44:24.543Z",
+  "updatedAt": "2026-05-27T14:44:34.645Z",
   "slides": {
     "slide-01": "This is where AI gets very powerful across teams",
     "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated",
-    "slide-03": "*"
+    "slide-03": "*Copilot has a LOT of this baked into its fine tuning"
   }
 }
