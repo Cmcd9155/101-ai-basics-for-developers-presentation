@@ -1,8 +1,9 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T14:43:41.721Z",
+  "updatedAt": "2026-05-27T14:44:24.543Z",
   "slides": {
     "slide-01": "This is where AI gets very powerful across teams",
-    "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated"
+    "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated",
+    "slide-03": "*"
   }
 }
