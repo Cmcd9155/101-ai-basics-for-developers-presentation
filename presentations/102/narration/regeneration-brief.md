@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T14:43:28.421Z
+Updated: 2026-05-27T14:43:30.980Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
