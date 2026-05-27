@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T14:51:32.627Z",
+  "updatedAt": "2026-05-27T14:51:37.459Z",
   "slides": {
     "slide-01": "This is where AI gets very powerful across teams",
     "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated",
     "slide-03": "*Copilot has a LOT of this baked into its fine tuning (explain fine tuning and how copilot does it)",
     "slide-04": "* Good for generic data\n* Good: On every session\n*Bad: giving too much non relavent context can bloat the agent\n",
     "slide-05": "* Hard boundaries/scripts are often better if same process always\n* Soft boundaries are more complicated but more dynamic/flexible\n* good harness context can keep the model focused (this is an art form)\n",
-    "slide-06": "* Skills, custom workflows conditionally added\n"
+    "slide-06": "* Skills, custom workflows conditionally added\n* Keeps agent from addin"
   }
 }
