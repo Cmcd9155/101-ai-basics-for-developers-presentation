@@ -7,9 +7,6 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
-const SCRIPT_PATH = path.join(REPO_ROOT, "narration", "script.json");
-const AUDIO_DIR = path.join(REPO_ROOT, "narration", "audio");
-const MANIFEST_PATH = path.join(REPO_ROOT, "narration", "manifest.json");
 const REPO_ENV_PATH = path.join(REPO_ROOT, ".env");
 const COMPANION_ENV_PATH = "/Users/chrisdonahue/Code/companion/.env.local";
 const TTS_URL = "https://api.x.ai/v1/tts";
@@ -21,6 +18,7 @@ function parseArgs(argv) {
     dryRun: false,
     force: false,
     slide: null,
+    deck: "101",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -32,6 +30,11 @@ function parseArgs(argv) {
       const next = argv[index + 1];
       if (!next) throw new Error("--slide requires a slide number or id.");
       args.slide = normalizeSlideSelector(next);
+      index += 1;
+    } else if (arg === "--deck") {
+      const next = argv[index + 1];
+      if (!next) throw new Error("--deck requires a presentation id, such as 101 or 102.");
+      args.deck = normalizeDeckId(next);
       index += 1;
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
@@ -48,14 +51,36 @@ function parseArgs(argv) {
   return args;
 }
 
+function normalizeDeckId(value) {
+  const deckId = String(value || "101").trim();
+  if (!/^[a-zA-Z0-9_-]+$/.test(deckId)) {
+    throw new Error(`Invalid deck id: ${deckId}`);
+  }
+  return deckId;
+}
+
+function deckRoot(deckId) {
+  return path.join(REPO_ROOT, "presentations", normalizeDeckId(deckId));
+}
+
+function deckPaths(deckId) {
+  const root = deckRoot(deckId);
+  return {
+    root,
+    scriptPath: path.join(root, "narration", "script.json"),
+    audioDir: path.join(root, "narration", "audio"),
+    manifestPath: path.join(root, "narration", "manifest.json"),
+  };
+}
+
 function printHelp() {
   console.log(`Generate Ara narration audio.
 
 Usage:
-  node scripts/generate-ara-narration.mjs --dry-run
-  node scripts/generate-ara-narration.mjs --slide 1
-  node scripts/generate-ara-narration.mjs --all
-  node scripts/generate-ara-narration.mjs --all --force
+  node scripts/generate-ara-narration.mjs --deck 102 --dry-run
+  node scripts/generate-ara-narration.mjs --deck 102 --slide 1
+  node scripts/generate-ara-narration.mjs --deck 102 --all
+  node scripts/generate-ara-narration.mjs --deck 102 --all --force
 
 The script reads XAI_API_KEY from the environment, then falls back to
 ${REPO_ENV_PATH}, then ${COMPANION_ENV_PATH}. It never prints the key.`);
@@ -92,8 +117,8 @@ function estimateSeconds(text) {
   return Math.round((wordCount(text) / DEFAULT_WORDS_PER_MINUTE) * 60);
 }
 
-function audioPathFor(slide) {
-  return path.join(AUDIO_DIR, `${slide.slideId}.mp3`);
+function audioPathFor(audioDir, slide) {
+  return path.join(audioDir, `${slide.slideId}.mp3`);
 }
 
 async function fileExists(filePath) {
@@ -196,10 +221,10 @@ async function ffprobeDuration(filePath) {
   }
 }
 
-async function buildManifest(script) {
+async function buildManifest(script, paths) {
   const slides = [];
   for (const slide of script.slides) {
-    const filePath = audioPathFor(slide);
+    const filePath = audioPathFor(paths.audioDir, slide);
     const hasAudio = await fileExists(filePath);
     const actualDurationSeconds = hasAudio ? await ffprobeDuration(filePath) : null;
     slides.push({
@@ -209,8 +234,8 @@ async function buildManifest(script) {
       targetSeconds: slide.targetSeconds,
       estimatedSeconds: estimateSeconds(slide.ttsText),
       actualDurationSeconds: actualDurationSeconds === null ? null : Number(actualDurationSeconds.toFixed(3)),
-      imagePath: `previews/${slide.slideId}.png`,
-      audioPath: `narration/audio/${slide.slideId}.mp3`,
+        imagePath: `previews/${slide.slideId}.png`,
+        audioPath: `narration/audio/${slide.slideId}.mp3`,
       captionText: slide.captionText,
       ttsText: slide.ttsText,
     });
@@ -234,8 +259,8 @@ async function buildManifest(script) {
 
 function validateScript(script) {
   const errors = [];
-  if (!Array.isArray(script.slides) || script.slides.length !== 16) {
-    errors.push(`Expected 16 slides, found ${script.slides?.length ?? 0}.`);
+  if (!Array.isArray(script.slides) || script.slides.length < 1) {
+    errors.push(`Expected at least 1 slide, found ${script.slides?.length ?? 0}.`);
   }
 
   const seen = new Set();
@@ -283,11 +308,12 @@ function formatSeconds(value) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const script = await readJson(SCRIPT_PATH);
+  const paths = deckPaths(args.deck);
+  const script = await readJson(paths.scriptPath);
   validateScript(script);
 
   if (args.dryRun) {
-    const manifest = await buildManifest(script);
+    const manifest = await buildManifest(script, paths);
     printTiming(script, manifest);
     return;
   }
@@ -302,10 +328,10 @@ async function main() {
     throw new Error(`XAI_API_KEY is not configured in the environment, ${REPO_ENV_PATH}, or ${COMPANION_ENV_PATH}.`);
   }
 
-  await fs.mkdir(AUDIO_DIR, { recursive: true });
+  await fs.mkdir(paths.audioDir, { recursive: true });
 
   for (const slide of selectedSlides) {
-    const filePath = audioPathFor(slide);
+    const filePath = audioPathFor(paths.audioDir, slide);
     if (!args.force && (await fileExists(filePath))) {
       console.log(`Skipping ${slide.slideId}; audio already exists. Use --force to regenerate.`);
       continue;
@@ -319,10 +345,10 @@ async function main() {
     console.log(`Saved ${path.relative(REPO_ROOT, filePath)} (${bytes.length.toLocaleString()} bytes, ${durationText})`);
   }
 
-  const manifest = await buildManifest(script);
-  await fs.writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  const manifest = await buildManifest(script, paths);
+  await fs.writeFile(paths.manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   printTiming(script, manifest);
-  console.log(`Wrote ${path.relative(REPO_ROOT, MANIFEST_PATH)}`);
+  console.log(`Wrote ${path.relative(REPO_ROOT, paths.manifestPath)}`);
 }
 
 main().catch((error) => {

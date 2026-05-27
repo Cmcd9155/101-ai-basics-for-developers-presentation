@@ -8,10 +8,6 @@ import { URL } from "node:url";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
 const DEFAULT_PORT = 4173;
-const FEEDBACK_PATH = path.join(REPO_ROOT, "narration", "feedback.json");
-const FEEDBACK_EVENTS_PATH = path.join(REPO_ROOT, "narration", "feedback-events.jsonl");
-const REGENERATION_BRIEF_PATH = path.join(REPO_ROOT, "narration", "regeneration-brief.md");
-const NOTE_ARTIFACT_PATHS = [FEEDBACK_PATH, FEEDBACK_EVENTS_PATH, REGENERATION_BRIEF_PATH];
 const execFileAsync = promisify(execFile);
 
 const MIME_TYPES = new Map([
@@ -44,6 +40,31 @@ function safeResolve(urlPath) {
   return resolved;
 }
 
+function normalizeDeckId(value) {
+  const deckId = String(value || "101").trim();
+  if (!/^[a-zA-Z0-9_-]+$/.test(deckId)) {
+    throw new Error(`Invalid deck id: ${deckId}`);
+  }
+  return deckId;
+}
+
+function deckRoot(deckId) {
+  return path.join(REPO_ROOT, "presentations", normalizeDeckId(deckId));
+}
+
+function noteArtifactPaths(deckId) {
+  const root = deckRoot(deckId);
+  const feedbackPath = path.join(root, "narration", "feedback.json");
+  const feedbackEventsPath = path.join(root, "narration", "feedback-events.jsonl");
+  const regenerationBriefPath = path.join(root, "narration", "regeneration-brief.md");
+  return {
+    feedbackPath,
+    feedbackEventsPath,
+    regenerationBriefPath,
+    all: [feedbackPath, feedbackEventsPath, regenerationBriefPath],
+  };
+}
+
 async function respondFile(response, filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES.get(extension) || "application/octet-stream";
@@ -73,9 +94,10 @@ async function readRequestJson(request) {
   return JSON.parse(raw);
 }
 
-async function readFeedback() {
+async function readFeedback(deckId) {
+  const { feedbackPath } = noteArtifactPaths(deckId);
   try {
-    return JSON.parse(await fs.readFile(FEEDBACK_PATH, "utf8"));
+    return JSON.parse(await fs.readFile(feedbackPath, "utf8"));
   } catch (error) {
     if (error && error.code === "ENOENT") {
       return {
@@ -144,11 +166,12 @@ function buildRegenerationBrief(feedback) {
   return `${lines.join("\n")}\n`;
 }
 
-async function writeFeedbackArtifacts(feedback) {
-  await fs.mkdir(path.dirname(FEEDBACK_PATH), { recursive: true });
-  await fs.writeFile(FEEDBACK_PATH, `${JSON.stringify(feedback, null, 2)}\n`, "utf8");
+async function writeFeedbackArtifacts(deckId, feedback) {
+  const { feedbackPath, feedbackEventsPath, regenerationBriefPath } = noteArtifactPaths(deckId);
+  await fs.mkdir(path.dirname(feedbackPath), { recursive: true });
+  await fs.writeFile(feedbackPath, `${JSON.stringify(feedback, null, 2)}\n`, "utf8");
   await fs.appendFile(
-    FEEDBACK_EVENTS_PATH,
+    feedbackEventsPath,
     `${JSON.stringify({
       event: "feedback_saved",
       updatedAt: feedback.updatedAt,
@@ -157,7 +180,7 @@ async function writeFeedbackArtifacts(feedback) {
     })}\n`,
     "utf8",
   );
-  await fs.writeFile(REGENERATION_BRIEF_PATH, buildRegenerationBrief(feedback), "utf8");
+  await fs.writeFile(regenerationBriefPath, buildRegenerationBrief(feedback), "utf8");
 }
 
 function relativeToRepo(filePath) {
@@ -173,8 +196,8 @@ async function git(args, options = {}) {
   return result.stdout.trim();
 }
 
-async function pushFeedbackArtifacts(feedback) {
-  const relativePaths = NOTE_ARTIFACT_PATHS.map(relativeToRepo);
+async function pushFeedbackArtifacts(deckId, feedback) {
+  const relativePaths = noteArtifactPaths(deckId).all.map(relativeToRepo);
   try {
     await git(["add", "--", ...relativePaths]);
 
@@ -211,16 +234,16 @@ async function pushFeedbackArtifacts(feedback) {
   }
 }
 
-async function handleFeedback(request, response) {
+async function handleFeedback(request, response, deckId) {
   if (request.method === "GET") {
-    respondJson(response, 200, await readFeedback());
+    respondJson(response, 200, await readFeedback(deckId));
     return;
   }
 
   if (request.method === "POST") {
     const feedback = normalizeFeedbackPayload(await readRequestJson(request));
-    await writeFeedbackArtifacts(feedback);
-    const githubPush = await pushFeedbackArtifacts(feedback);
+    await writeFeedbackArtifacts(deckId, feedback);
+    const githubPush = await pushFeedbackArtifacts(deckId, feedback);
     respondJson(response, 200, {
       ...feedback,
       githubPush,
@@ -236,11 +259,17 @@ async function handler(request, response) {
   try {
     const url = new URL(request.url ?? "/", "http://localhost");
     if (url.pathname === "/api/feedback") {
-      await handleFeedback(request, response);
+      await handleFeedback(request, response, url.searchParams.get("deck") || "101");
       return;
     }
 
-    const pathname = url.pathname === "/" ? "/player/index.html" : url.pathname;
+    if (url.pathname === "/player" || url.pathname === "/player/") {
+      response.writeHead(302, { Location: "/" });
+      response.end();
+      return;
+    }
+
+    const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
     const filePath = safeResolve(pathname);
 
     if (!filePath) {
@@ -274,5 +303,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Ara presentation player: http://127.0.0.1:${port}/player/`);
+  console.log(`AI basics presentation chooser: http://127.0.0.1:${port}/`);
 });

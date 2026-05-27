@@ -1,10 +1,13 @@
+const deckMatch = window.location.pathname.match(/\/presentations\/([^/]+)\/player\/?/);
+const DECK_ID = deckMatch?.[1] || "101";
 const ROOT_PREFIX = "../";
 const MANIFEST_URL = `${ROOT_PREFIX}narration/manifest.json`;
 const SCRIPT_URL = `${ROOT_PREFIX}narration/script.json`;
-const FEEDBACK_URL = "/api/feedback";
-const FEEDBACK_STORAGE_KEY = "araDeckSlideFeedback:v1";
+const FEEDBACK_URL = `/api/feedback?deck=${encodeURIComponent(DECK_ID)}`;
+const FEEDBACK_STORAGE_KEY = `araDeckSlideFeedback:${DECK_ID}:v1`;
 const PANEL_COLLAPSED_STORAGE_KEY = "araDeckPanelCollapsed:v1";
-const CURRENT_SLIDE_STORAGE_KEY = "araDeckCurrentSlide:v1";
+const CURRENT_SLIDE_STORAGE_KEY = `araDeckCurrentSlide:${DECK_ID}:v1`;
+const PREVIEW_CACHE_TOKEN = String(Date.now());
 
 const elements = {
   audio: document.querySelector("#audio"),
@@ -62,6 +65,11 @@ function stripSpeechTags(text) {
 
 function rootPath(path) {
   return `${ROOT_PREFIX}${path}`;
+}
+
+function cacheBustedRootPath(path) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${rootPath(path)}${separator}v=${encodeURIComponent(PREVIEW_CACHE_TOKEN)}`;
 }
 
 async function fetchJson(url) {
@@ -153,6 +161,10 @@ function readPanelCollapsed() {
 }
 
 function readCurrentSlideIndex(slideCount) {
+  const requestedSlide = Number.parseInt(new URLSearchParams(window.location.search).get("slide") || "", 10);
+  if (Number.isInteger(requestedSlide)) {
+    return Math.max(0, Math.min(requestedSlide - 1, slideCount - 1));
+  }
   const stored = Number.parseInt(localStorage.getItem(CURRENT_SLIDE_STORAGE_KEY) || "0", 10);
   if (!Number.isInteger(stored)) return 0;
   return Math.max(0, Math.min(stored, slideCount - 1));
@@ -244,7 +256,7 @@ function loadSlide(index, { autoplay = false, restart = true } = {}) {
   writeCurrentSlideIndex(currentIndex);
   const slide = currentSlide();
 
-  elements.image.src = rootPath(slide.imagePath);
+  elements.image.src = cacheBustedRootPath(slide.imagePath);
   elements.image.alt = `Slide ${slide.slideNumber}: ${slide.title}`;
   elements.slideCount.textContent = `Slide ${slide.slideNumber} of ${manifest.slides.length}`;
   elements.slideTitle.textContent = slide.title;
