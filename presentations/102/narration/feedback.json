@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-27T15:02:16.011Z",
+  "updatedAt": "2026-05-27T15:02:19.455Z",
   "slides": {
     "slide-01": "This is where AI gets very powerful across teams",
     "slide-02": "* basic idea, persistent context across sessions\n\n*this is where agents get insane powerful, automated",
@@ -11,6 +11,6 @@
     "slide-07": "* high level think. Anything im waisting time doing, how can i make a skill to do it for me\n*AI can do more than you think",
     "slide-10": "* sometimes you have test that take minutes, if they take seconds development workflow is better\n* you can run ai's on output checks to look for issues. explain model weights and how they are set here.",
     "slide-11": "* feedback loop. explain skills evolution\n\nupdate skills when they dont do what you want. Team collaboration\n\n",
-    "slide-12": "workshop skill/instructions"
+    "slide-12": "workshop skill/instructions/prompts"
   }
 }

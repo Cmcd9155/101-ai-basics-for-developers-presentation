@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T15:02:16.011Z
+Updated: 2026-05-27T15:02:19.455Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -57,7 +57,7 @@ update skills when they dont do what you want. Team collaboration
 
 ### Slide 12 (slide-12)
 
-workshop skill/instructions
+workshop skill/instructions/prompts
 
 ## Current Global Preferences
 
