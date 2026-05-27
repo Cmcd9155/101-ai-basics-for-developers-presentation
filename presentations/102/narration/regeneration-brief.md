@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T14:43:33.634Z
+Updated: 2026-05-27T14:43:36.726Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -15,7 +15,7 @@ This is where AI gets very powerful across teams
 
 * basic idea, persistent context across sessions
 
-*this is where
+*this is where agents ge
 
 ## Current Global Preferences
 
