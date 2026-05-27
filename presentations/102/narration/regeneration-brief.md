@@ -1,6 +1,6 @@
 # Ara Narration Regeneration Brief
 
-Updated: 2026-05-27T15:04:21.951Z
+Updated: 2026-05-27T15:04:28.364Z
 
 Use this file as the durable additional-notes source when regenerating slide scripts or audio.
 Preserve already-approved conversational presenter style unless a slide note says otherwise.
@@ -11,7 +11,7 @@ Preserve already-approved conversational presenter style unless a slide note say
 
 This is where AI gets very powerful across teams
 
-ai learning important
+ai learning important (would be cool to have ani talk in this meeting)
 
 ### Slide 2 (slide-02)
 
