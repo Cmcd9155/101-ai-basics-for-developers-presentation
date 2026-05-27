@@ -7,56 +7,56 @@ const repoEnvPath = path.join(path.resolve(repoRoot, "../.."), ".env");
 const companionEnvPath = "/Users/chrisdonahue/Code/companion/.env.local";
 
 const baseStyle =
-  "Premium editorial 16:9 technical illustration for a developer workshop. Modern software engineering aesthetic, light background, charcoal ink, teal and blue accents, small amber and green highlights, crisp vector-like detail, spacious professional composition, no readable text, no letters, no words, no numbers, no logos, no brand marks.";
+  "Sharp editorial 16:9 technical illustration for a live developer workshop. Build the image around one dominant proof object, not a collage: IDE workbench, repo map, command rails, review evidence, or permission boundary. Light warm-gray background, charcoal ink, teal and blue accents, small amber and green highlights, restrained developer-workshop palette, no purple or pink decorative lighting, high contrast, crisp vector-like geometry, realistic developer artifacts, generous negative space, no readable text, no letters, no words, no numbers, no logos, no brand marks, no mascot, no generic glowing robot.";
 
 const prompts = [
   {
     name: "hero-agent-harnesses.png",
-    prompt: `${baseStyle} Show a modern IDE workspace inside a protective but lightweight harness: rails, boundaries, test indicators, review shields, and a human engineer guiding an abstract AI assistant. The mood should feel controlled, useful, and calm, not locked down or scary.`,
+    prompt: `${baseStyle} Cover image: a modern code editor workbench sits inside a precise lightweight harness frame. The harness has permission rails, test status lights, diff panels, and review shields attached to concrete repo artifacts. A human engineer is guiding the workflow from the edge of the scene. Make it controlled, useful, and calm, not cyberpunk or scary.`,
   },
   {
     name: "prompt-to-harness.png",
-    prompt: `${baseStyle} Show a single prompt card on the left helping one agent session, contrasted with a durable repo harness on the right containing instructions, playbooks, scripts, test checks, and review shields that support many future sessions.`,
+    prompt: `${baseStyle} Strong contrast composition: left side has one small disposable prompt card fading after a single session; right side has a durable repo harness cabinet with four visible blank artifact types: instruction pages, playbook cards, command lanes, and check reports. Show repetition across many future sessions with subtle ghosted session paths.`,
   },
   {
     name: "rules-moves-tools-checks.png",
-    prompt: `${baseStyle} Show a clean four-part operating system around an AI coding assistant: rules as instruction cards, moves as reusable playbook paths, tools as safe command/tool adapters, checks as tests and review shields. Use four distinct zones connected in a loop.`,
+    prompt: `${baseStyle} Four-part operating model as a precise workshop diagram. Center is an abstract repo workbench, surrounded by four distinct blank zones: rules as instruction sheets, moves as branching playbook paths, tools as command adapters, checks as test/report shields. Use a clean loop with clear attachment points and strong separation between zones.`,
   },
   {
     name: "copilot-instructions-operating-manual.png",
-    prompt: `${baseStyle} Show a repository operating manual being inserted into a software repo: instruction cards, generated-file lock, safe command terminal, risky path boundary, and done checklist icons guiding an abstract coding assistant.`,
+    prompt: `${baseStyle} Repository operating manual image: a blank instruction file is clipped into a repo binder beside a code tree, safe command terminal, generated-file lock, risky-path boundary tape, and done checklist. Make it feel like standing engineering orders that govern every agent session.`,
   },
   {
     name: "blast-radius-boundaries.png",
-    prompt: `${baseStyle} Show agent permissions as expanding blast-radius rings around a repo: read files, edit local code, run allowlisted commands, and ship/release actions behind a human approval gate. Make boundaries look enabling and precise.`,
+    prompt: `${baseStyle} Permission model proof object: concentric blast-radius rings around a small repo core. Inner ring shows read-only file inspection, next ring local edits, next ring allowlisted command execution, outer ring ship/release actions behind a visible human approval gate. Make boundaries enabling, precise, and easy to read at thumbnail size.`,
   },
   {
     name: "skills-playbooks.png",
-    prompt: `${baseStyle} Show reusable agent skills as blank playbook cards or procedure modules being selected before and after code generation. Include a human engineer choosing the right move for the task. Every card, panel, button, and window must be blank or use only tiny abstract line texture; absolutely no labels, no readable text, no faux words, no UI text.`,
+    prompt: `${baseStyle} Reusable skills image: a human engineer selects one procedure module from a small rack of blank playbook cards before the code-generation path begins. Show before-coding, after-coding, and review passes as three clean lanes feeding the same repo workbench. Every card, panel, button, and window must be blank or use only tiny abstract line texture; absolutely no labels, no readable text, no faux words, no UI text.`,
   },
   {
     name: "team-habits.png",
-    prompt: `${baseStyle} Show team engineering habits becoming reusable agent procedures: bug triage evidence, migration dry-run safety, UI screen inspection, and PR review evidence, all represented as connected workflow stations around a repo.`,
+    prompt: `${baseStyle} Team habits as reusable agent procedures: four connected workshop stations around a repo table. Show evidence bundle for bug triage, dry-run sandbox for migration safety, screen-inspection monitor for UI testing, and PR review evidence board. Each station should look concrete and useful, not decorative.`,
   },
   {
     name: "runnable-scripts.png",
-    prompt: `${baseStyle} Show safe repository scripts as clearly marked command lanes an AI agent can run: changed tests, verification bundle, local smoke check, and PR evidence collector. The commands should be visual terminal blocks with abstract lines only.`,
+    prompt: `${baseStyle} Safe scripts proof object: a command terminal splits into four allowlisted lanes with blank terminal blocks, status dots, test beakers, browser smoke-check screen, and PR evidence packet. The agent follows rails instead of inventing commands. Use abstract lines only inside terminal blocks; no readable command text.`,
   },
   {
     name: "soft-checks.png",
-    prompt: `${baseStyle} Show soft lint and quality checks producing warnings rather than hard stop signs: issue markers, caution flags, accessibility hints, type-safety signals, and a clean report flowing back to an AI assistant for cleanup.`,
+    prompt: `${baseStyle} Soft checks image: quality scanner creates a warning report that flows back into a cleanup loop rather than blocking everything. Include issue markers, caution flags, accessibility hint symbols, type-safety signals, and a clean report stack. Show the difference between a hard gate and a soft report without any text.`,
   },
   {
     name: "post-generation-review.png",
-    prompt: `${baseStyle} Show code generated by an AI assistant moving through a post-generation review harness: changed tests, soft lint report, diagnostic scan, and final evidence summary before a human reviewer inspects the diff.`,
+    prompt: `${baseStyle} Post-generation review pipeline: an AI-generated diff moves through four concrete stations: changed tests, soft lint report, diagnostic scan, and evidence packet. A human reviewer waits at the end with the diff open. Make the pipeline left-to-right, crisp, and inspectable at thumbnail size.`,
   },
   {
     name: "harness-learning-loop.png",
-    prompt: `${baseStyle} Show a learning loop from AI failure to cause analysis to harness improvement to a better next session. Include instruction update, new script, added test, and review checklist as visual repair actions.`,
+    prompt: `${baseStyle} Harness learning loop: show one failed agent session being traced to a cause, then repaired by updating one of four blank artifacts: instruction sheet, command script, focused test, or review checklist. The loop returns into a cleaner next session. Make the feedback loop the dominant shape.`,
   },
   {
     name: "inspectable-work.png",
-    prompt: `${baseStyle} Show AI-generated work becoming inspectable: bounded work area, visible tool path, passing checks, review shield, and a human engineer calmly reviewing evidence before merge.`,
+    prompt: `${baseStyle} Final image: AI-generated work becomes inspectable. Show a bounded work area, visible tool path, passing check reports, review shield, and human engineer calmly reviewing evidence before merge. The composition should feel like a clear engineering operating system, not abstract AI magic.`,
   },
 ];
 

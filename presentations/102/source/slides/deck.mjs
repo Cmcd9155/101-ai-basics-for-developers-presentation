@@ -16,7 +16,6 @@ const C = {
   amber: "#F59E0B",
   red: "#DC2626",
   green: "#16A34A",
-  violet: "#7C3AED",
   code: "#0B1220",
 };
 
@@ -148,7 +147,7 @@ const slides = [
       ["Hard gate", "Blocks merge when the repo already enforces the rule."],
       ["Soft report", "Returns warnings so Copilot can fix obvious issues without stopping."],
     ],
-    examples: ["unused code", "unsafe any", "accessibility hints", "slow tests", "wide diff"],
+    examples: ["unused code", "unsafe any", "a11y hints", "slow tests", "wide diff"],
     rule: "A soft check is not permission to ignore quality. It is a way to surface quality earlier.",
   },
   {
@@ -260,6 +259,8 @@ async function maybeImage(slide, ctx, file, x, y, w, h, fit = "cover") {
 function bg(slide, ctx) {
   rect(slide, ctx, 0, 0, 1280, 720, C.bg, "none");
   rect(slide, ctx, 0, 0, 1280, 6, C.teal, "none");
+  rect(slide, ctx, 1128, 6, 152, 714, "#EFF7F6", "none");
+  rect(slide, ctx, 1128, 6, 1, 714, "#D8EDEA", "none");
 }
 
 function sourceText(source) {
@@ -285,6 +286,47 @@ function heading(slide, ctx, s, n, width = 820) {
 function pill(slide, ctx, value, x, y, w, color = C.teal) {
   rect(slide, ctx, x, y, w, 30, "#FFFFFF", color);
   text(slide, ctx, value, x + 12, y + 7, w - 24, 14, { size: 9.5, color, bold: true, align: "center" });
+}
+
+function svgDataUrl(svg) {
+  return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
+}
+
+async function arrow(slide, ctx, x1, y1, x2, y2, color = C.teal) {
+  const width = Math.max(18, x2 - x1);
+  const height = 18;
+  const head = Math.min(10, Math.max(7, width * 0.42));
+  const stroke = Math.min(4, Math.max(2.6, width * 0.08));
+  const mid = height / 2;
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <line x1="1" y1="${mid}" x2="${width - head + 1}" y2="${mid}" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"/>
+  <path d="M ${width - 1} ${mid} L ${width - head} ${mid - head * 0.55} L ${width - head} ${mid + head * 0.55} Z" fill="${color}"/>
+</svg>`;
+  await ctx.addImage(slide, {
+    dataUrl: svgDataUrl(svg),
+    x: x1,
+    y: y1 - height / 2,
+    w: width,
+    h: height,
+    fit: "fill",
+    alt: "direction arrow",
+  });
+}
+
+function darkCallout(slide, ctx, value, x, y, w, h, accent = C.teal) {
+  rect(slide, ctx, x, y, w, h, C.dark, "none");
+  rect(slide, ctx, x, y, 5, h, accent, "none");
+  text(slide, ctx, value, x + 28, y + Math.max(18, h / 2 - 17), w - 56, 34, { size: 16, bold: true, color: "#E5EEF7", valign: "mid" });
+}
+
+function stepBox(slide, ctx, x, y, w, h, label, body, color, index = null) {
+  rect(slide, ctx, x, y, w, h, C.panel, C.line);
+  rect(slide, ctx, x, y, 5, h, color, "none");
+  if (index) text(slide, ctx, String(index).padStart(2, "0"), x + 18, y + 20, 34, 24, { size: 17, bold: true, color });
+  const textX = index ? x + 64 : x + 24;
+  text(slide, ctx, label, textX, y + 16, w - (textX - x) - 24, 22, { size: 16, bold: true, color });
+  text(slide, ctx, body, textX, y + 40, w - (textX - x) - 24, h - 48, { size: 11.2, color: C.muted });
 }
 
 function card(slide, ctx, x, y, w, h, headingValue, body, accent = C.teal, opts = {}) {
@@ -332,11 +374,22 @@ async function cover(presentation, ctx, s, n) {
 async function splitClaim(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  heading(slide, ctx, s, n, 620);
-  await maybeImage(slide, ctx, s.image, 690, 88, 540, 308);
-  codePanel(slide, ctx, s.callout, 74, 214, 520, 96);
-  card(slide, ctx, 74, 356, 244, 112, s.left[0], s.left[1], C.amber);
-  card(slide, ctx, 350, 356, 244, 112, s.right[0], s.right[1], C.green);
+  heading(slide, ctx, s, n, 650);
+  await maybeImage(slide, ctx, s.image, 728, 104, 460, 238);
+  rect(slide, ctx, 74, 210, 244, 230, "#FFFFFF", C.line);
+  rect(slide, ctx, 74, 210, 5, 230, C.amber, "none");
+  text(slide, ctx, "ONE-OFF PROMPT", 104, 236, 160, 18, { size: 10, bold: true, color: C.amber });
+  codePanel(slide, ctx, s.left[1], 104, 276, 184, 74);
+  text(slide, ctx, "Useful once, then forgotten unless the human repeats it.", 104, 372, 170, 38, { size: 12, color: C.muted });
+  await arrow(slide, ctx, 332, 326, 430, 326, C.teal);
+  rect(slide, ctx, 444, 188, 218, 292, C.dark, "none");
+  rect(slide, ctx, 444, 188, 5, 292, C.teal, "none");
+  text(slide, ctx, "REPO HARNESS", 478, 218, 150, 18, { size: 10, bold: true, color: "#8FE7DD" });
+  ["Instructions", "Skills", "Scripts", "Checks"].forEach((item, i) => {
+    rect(slide, ctx, 478, 260 + i * 44, 142, 24, "#243044", "none");
+    text(slide, ctx, item, 494, 266 + i * 44, 110, 12, { size: 9.5, bold: true, color: "#DCE8F2", align: "center" });
+  });
+  darkCallout(slide, ctx, s.callout, 728, 382, 460, 76, C.teal);
   rect(slide, ctx, 188, 592, 904, 52, "#EEF9F8", C.teal);
   text(slide, ctx, s.rule, 230, 608, 820, 20, { size: 15.5, bold: true, align: "center" });
   return slide;
@@ -345,16 +398,25 @@ async function splitClaim(presentation, ctx, s, n) {
 async function model(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
-  heading(slide, ctx, s, n, 590);
-  await maybeImage(slide, ctx, s.image, 678, 86, 552, 330);
-  s.parts.forEach(([head, body, color], i) => {
-    const x = 74 + (i % 2) * 268;
-    const y = 220 + Math.floor(i / 2) * 132;
-    card(slide, ctx, x, y, 228, 98, head, body, color);
-  });
-  rect(slide, ctx, 690, 470, 540, 86, C.dark, "none");
-  rect(slide, ctx, 690, 470, 5, 86, C.teal, "none");
-  text(slide, ctx, s.callout, 720, 495, 460, 34, { size: 17, bold: true, color: "#E5EEF7" });
+  heading(slide, ctx, s, n, 620);
+  await maybeImage(slide, ctx, s.image, 760, 88, 428, 250);
+  rect(slide, ctx, 130, 232, 430, 220, "#FFFFFF", C.line);
+  rect(slide, ctx, 290, 294, 110, 86, C.dark, "none");
+  text(slide, ctx, "HARNESS", 308, 325, 74, 16, { size: 12, bold: true, color: "#DCE8F2", align: "center" });
+  const partPositions = [
+    [64, 196],
+    [438, 196],
+    [64, 402],
+    [438, 402],
+  ];
+  for (let i = 0; i < s.parts.length; i += 1) {
+    const [head, body, color] = s.parts[i];
+    const [x, y] = partPositions[i];
+    stepBox(slide, ctx, x, y, 210, 92, head, body, color);
+    if (x < 300) await arrow(slide, ctx, x + 210, y + 46, 300, y + 46, color);
+    else await arrow(slide, ctx, 402, y + 46, x, y + 46, color);
+  }
+  darkCallout(slide, ctx, s.callout, 760, 392, 428, 88, C.teal);
   return slide;
 }
 
@@ -363,11 +425,11 @@ async function instruction(presentation, ctx, s, n) {
   bg(slide, ctx);
   heading(slide, ctx, s, n, 540);
   await maybeImage(slide, ctx, s.image, 620, 84, 610, 330);
-  codePanel(slide, ctx, s.fileLabel, 74, 204, 460, 68);
-  rect(slide, ctx, 74, 302, 460, 76, C.dark, "none");
-  rect(slide, ctx, 74, 302, 5, 76, C.teal, "none");
-  text(slide, ctx, s.callout, 104, 323, 360, 30, { size: 16, bold: true, color: "#E5EEF7" });
-  s.rows.forEach(([head, body], i) => card(slide, ctx, 74 + (i % 2) * 286, 420 + Math.floor(i / 2) * 108, 244, 96, head, body, [C.teal, C.blue, C.amber, C.green][i]));
+  codePanel(slide, ctx, s.fileLabel, 74, 198, 430, 62);
+  darkCallout(slide, ctx, s.callout, 74, 286, 430, 76, C.teal);
+  s.rows.forEach(([head, body], i) => {
+    stepBox(slide, ctx, 74 + (i % 2) * 276, 404 + Math.floor(i / 2) * 104, 254, 90, head, body, [C.teal, C.blue, C.amber, C.green][i], i + 1);
+  });
   return slide;
 }
 
@@ -375,14 +437,16 @@ async function boundary(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 560);
-  await maybeImage(slide, ctx, s.image, 650, 82, 580, 320);
-  s.levels.forEach(([head, body, color], i) => {
-    const x = 74 + i * 132;
-    rect(slide, ctx, x, 224, 108, 88, "#FFFFFF", color);
-    text(slide, ctx, head, x + 16, 246, 76, 20, { size: 16, bold: true, color, align: "center" });
-    text(slide, ctx, body, x + 12, 274, 84, 26, { size: 8.5, color: C.muted, align: "center" });
-  });
-  s.buckets.forEach(([head, body], i) => card(slide, ctx, 74 + i * 386, 436, 330, 104, head, body, [C.green, C.amber, C.red][i]));
+  await maybeImage(slide, ctx, s.image, 700, 82, 488, 286);
+  for (let i = 0; i < s.levels.length; i += 1) {
+    const [head, body, color] = s.levels[i];
+    const x = 74 + i * 148;
+    rect(slide, ctx, x, 232, 126, 74, "#FFFFFF", color);
+    text(slide, ctx, head, x + 16, 250, 94, 20, { size: 16, bold: true, color, align: "center" });
+    text(slide, ctx, body, x + 14, 276, 98, 18, { size: 8.4, color: C.muted, align: "center" });
+    if (i < s.levels.length - 1) await arrow(slide, ctx, x + 126, 269, x + 148, 269, color);
+  }
+  s.buckets.forEach(([head, body], i) => card(slide, ctx, 74 + i * 376, 426, 320, 104, head, body, [C.green, C.amber, C.red][i]));
   rect(slide, ctx, 188, 606, 904, 44, "#EEF9F8", C.teal);
   text(slide, ctx, s.rule, 250, 619, 780, 18, { size: 14.5, bold: true, align: "center" });
   return slide;
@@ -392,12 +456,15 @@ async function skills(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 540);
-  await maybeImage(slide, ctx, s.image, 630, 86, 600, 330);
-  rect(slide, ctx, 74, 214, 460, 88, C.dark, "none");
-  rect(slide, ctx, 74, 214, 5, 88, C.blue, "none");
-  text(slide, ctx, s.callout, 104, 242, 360, 28, { size: 17, bold: true, color: "#E5EEF7" });
-  s.examples.forEach(([head, body], i) => card(slide, ctx, 74, 324 + i * 90, 460, 76, head, body, [C.teal, C.blue, C.green][i]));
-  s.names.forEach((item, i) => pill(slide, ctx, item, 690 + i * 128, 500, 106, [C.teal, C.blue, C.violet, C.green][i]));
+  await maybeImage(slide, ctx, s.image, 692, 86, 496, 286);
+  darkCallout(slide, ctx, s.callout, 74, 206, 460, 78, C.blue);
+  s.examples.forEach(([head, body], i) => {
+    const y = 330 + i * 80;
+    stepBox(slide, ctx, 74, y, 460, 64, head, body, [C.teal, C.blue, C.green][i]);
+  });
+  s.names.forEach((item, i) => pill(slide, ctx, item, 688 + i * 120, 438, 102, [C.teal, C.blue, C.amber, C.green][i]));
+  rect(slide, ctx, 690, 492, 498, 58, "#FFFFFF", C.line);
+  text(slide, ctx, "Skills should be named, repeatable, and narrow enough to review.", 724, 509, 430, 28, { size: 14, bold: true, color: C.ink, align: "center" });
   return slide;
 }
 
@@ -416,15 +483,14 @@ async function scripts(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 540);
-  await maybeImage(slide, ctx, s.image, 626, 84, 604, 320);
-  rect(slide, ctx, 74, 210, 468, 82, C.dark, "none");
-  rect(slide, ctx, 74, 210, 5, 82, C.amber, "none");
-  text(slide, ctx, s.callout, 104, 236, 360, 26, { size: 16, bold: true, color: "#E5EEF7" });
+  await maybeImage(slide, ctx, s.image, 660, 96, 528, 246);
+  darkCallout(slide, ctx, s.callout, 74, 204, 468, 78, C.amber);
   s.commands.forEach(([command, body], i) => {
-    const y = 318 + i * 72;
-    rect(slide, ctx, 74, y, 468, 62, C.panel, C.line);
-    text(slide, ctx, `npm run ${command}`, 98, y + 22, 142, 16, { size: 11.5, color: [C.teal, C.blue, C.amber, C.green][i], bold: true, mono: true });
-    text(slide, ctx, body, 260, y + 12, 242, 40, { size: 10.8, color: C.muted });
+    const y = 320 + i * 66;
+    rect(slide, ctx, 74, y, 760, 54, i % 2 ? "#F8FAFC" : C.panel, C.line);
+    rect(slide, ctx, 74, y, 5, 54, [C.teal, C.blue, C.amber, C.green][i], "none");
+    text(slide, ctx, `npm run ${command}`, 104, y + 19, 178, 16, { size: 11.2, color: [C.teal, C.blue, C.amber, C.green][i], bold: true, mono: true });
+    text(slide, ctx, body, 318, y + 13, 440, 24, { size: 11.2, color: C.muted });
   });
   return slide;
 }
@@ -433,12 +499,11 @@ async function softChecks(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 560);
-  await maybeImage(slide, ctx, s.image, 640, 84, 590, 320);
-  rect(slide, ctx, 74, 212, 460, 80, C.dark, "none");
-  rect(slide, ctx, 74, 212, 5, 80, C.amber, "none");
-  text(slide, ctx, s.callout, 104, 238, 350, 24, { size: 16, bold: true, color: "#E5EEF7" });
-  s.contrast.forEach(([head, body], i) => card(slide, ctx, 74 + i * 250, 326, 216, 112, head, body, [C.red, C.green][i]));
-  s.examples.forEach((item, i) => pill(slide, ctx, item, 104 + i * 148, 502, 116, [C.teal, C.blue, C.amber, C.violet, C.green][i]));
+  await maybeImage(slide, ctx, s.image, 684, 86, 504, 280);
+  darkCallout(slide, ctx, s.callout, 74, 210, 460, 76, C.amber);
+  s.contrast.forEach(([head, body], i) => card(slide, ctx, 74 + i * 252, 326, 222, 112, head, body, [C.red, C.green][i]));
+  text(slide, ctx, "Typical soft reports", 74, 484, 220, 18, { size: 12, bold: true, color: C.muted });
+  s.examples.forEach((item, i) => pill(slide, ctx, item, 74 + i * 142, 514, 112, [C.teal, C.blue, C.amber, C.blue, C.green][i]));
   rect(slide, ctx, 188, 606, 904, 44, "#EEF9F8", C.teal);
   text(slide, ctx, s.rule, 236, 619, 808, 18, { size: 13.5, bold: true, align: "center" });
   return slide;
@@ -448,16 +513,15 @@ async function postReview(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 650);
-  await maybeImage(slide, ctx, s.image, 650, 82, 580, 320);
-  s.steps.forEach(([head, body], i) => {
-    const x = 74 + i * 286;
-    const y = 474;
-    card(slide, ctx, x, y, 244, 92, head, body, [C.teal, C.blue, C.amber, C.green][i]);
-    if (i < s.steps.length - 1) text(slide, ctx, ">", x + 252, y + 28, 24, 24, { size: 18, bold: true, color: C.teal });
-  });
-  rect(slide, ctx, 74, 214, 480, 90, C.dark, "none");
-  rect(slide, ctx, 74, 214, 5, 90, C.green, "none");
-  text(slide, ctx, s.rule, 104, 240, 380, 30, { size: 17, bold: true, color: "#E5EEF7" });
+  await maybeImage(slide, ctx, s.image, 648, 84, 540, 286);
+  for (let i = 0; i < s.steps.length; i += 1) {
+    const [head, body] = s.steps[i];
+    const x = 74 + i * 276;
+    const y = 470;
+    stepBox(slide, ctx, x, y, 232, 92, head, body, [C.teal, C.blue, C.amber, C.green][i], i + 1);
+    if (i < s.steps.length - 1) await arrow(slide, ctx, x + 232, y + 46, x + 276, y + 46, C.teal);
+  }
+  darkCallout(slide, ctx, s.rule, 74, 214, 480, 90, C.green);
   return slide;
 }
 
@@ -465,14 +529,15 @@ async function learning(presentation, ctx, s, n) {
   const slide = presentation.slides.add();
   bg(slide, ctx);
   heading(slide, ctx, s, n, 540);
-  await maybeImage(slide, ctx, s.image, 630, 82, 600, 320);
-  s.loop.forEach((item, i) => {
+  await maybeImage(slide, ctx, s.image, 690, 86, 498, 280);
+  for (let i = 0; i < s.loop.length; i += 1) {
+    const item = s.loop[i];
     const x = 74 + i * 138;
-    rect(slide, ctx, x, 226, 108, 58, "#FFFFFF", [C.red, C.amber, C.teal, C.green][i]);
-    text(slide, ctx, item, x + 10, 247, 88, 16, { size: 12.5, bold: true, color: [C.red, C.amber, C.teal, C.green][i], align: "center" });
-    if (i < s.loop.length - 1) text(slide, ctx, ">", x + 116, 244, 16, 18, { size: 14, bold: true, color: C.teal });
-  });
-  s.fixes.forEach(([head, body], i) => card(slide, ctx, 74 + (i % 2) * 268, 318 + Math.floor(i / 2) * 108, 230, 92, head, body, [C.teal, C.blue, C.amber, C.green][i]));
+    rect(slide, ctx, x, 224, 108, 58, "#FFFFFF", [C.red, C.amber, C.teal, C.green][i]);
+    text(slide, ctx, item, x + 10, 245, 88, 16, { size: 12.5, bold: true, color: [C.red, C.amber, C.teal, C.green][i], align: "center" });
+    if (i < s.loop.length - 1) await arrow(slide, ctx, x + 108, 253, x + 138, 253, C.teal);
+  }
+  s.fixes.forEach(([head, body], i) => stepBox(slide, ctx, 74 + (i % 2) * 268, 318 + Math.floor(i / 2) * 104, 230, 86, head, body, [C.teal, C.blue, C.amber, C.green][i]));
   rect(slide, ctx, 188, 606, 904, 44, "#EEF9F8", C.teal);
   text(slide, ctx, s.rule, 260, 619, 760, 18, { size: 14.5, bold: true, align: "center" });
   return slide;
@@ -495,7 +560,7 @@ async function appendix(presentation, ctx, s, n) {
   bg(slide, ctx);
   heading(slide, ctx, s, n, 780);
   rect(slide, ctx, 74, 184, 1132, 72, C.dark, "none");
-  rect(slide, ctx, 74, 184, 5, 72, C.violet, "none");
+  rect(slide, ctx, 74, 184, 5, 72, C.teal, "none");
   text(slide, ctx, s.callout, 104, 206, 930, 24, { size: 18, bold: true, color: "#E5EEF7" });
   s.steps.forEach(([head, body], i) => card(slide, ctx, 96 + (i % 2) * 554, 296 + Math.floor(i / 2) * 124, 488, 96, head, body, [C.teal, C.blue, C.amber, C.green][i]));
   text(slide, ctx, s.footer, 96, 648, 900, 18, { size: 12, color: C.muted });
