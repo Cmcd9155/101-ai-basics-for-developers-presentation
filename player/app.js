@@ -1,10 +1,14 @@
+const deckMatch = window.location.pathname.match(/\/presentations\/([^/]+)\/player\/?/);
+const DECK_ID = deckMatch?.[1] || "101";
 const ROOT_PREFIX = "../";
 const MANIFEST_URL = `${ROOT_PREFIX}narration/manifest.json`;
 const SCRIPT_URL = `${ROOT_PREFIX}narration/script.json`;
-const FEEDBACK_URL = "/api/feedback";
-const FEEDBACK_STORAGE_KEY = "araDeckSlideFeedback:v1";
+const FEEDBACK_URL = `/api/feedback?deck=${encodeURIComponent(DECK_ID)}`;
+const FEEDBACK_STORAGE_KEY = `araDeckSlideFeedback:${DECK_ID}:v1`;
 const PANEL_COLLAPSED_STORAGE_KEY = "araDeckPanelCollapsed:v1";
-const CURRENT_SLIDE_STORAGE_KEY = "araDeckCurrentSlide:v1";
+const LEGACY_CURRENT_SLIDE_STORAGE_KEY = `araDeckCurrentSlide:${DECK_ID}:v1`;
+const CURRENT_SLIDE_STORAGE_KEY = `araDeckCurrentSlide:${DECK_ID}:v2`;
+const PREVIEW_CACHE_TOKEN = String(Date.now());
 
 const elements = {
   audio: document.querySelector("#audio"),
@@ -43,6 +47,7 @@ let feedback = {};
 let feedbackSaveTimer = null;
 let panelCollapsed = false;
 let seeking = false;
+let syncingLocation = false;
 
 function formatSeconds(value) {
   if (!Number.isFinite(value) || value < 0) return "0:00";
@@ -62,6 +67,11 @@ function stripSpeechTags(text) {
 
 function rootPath(path) {
   return `${ROOT_PREFIX}${path}`;
+}
+
+function cacheBustedRootPath(path) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${rootPath(path)}${separator}v=${encodeURIComponent(PREVIEW_CACHE_TOKEN)}`;
 }
 
 async function fetchJson(url) {
@@ -152,14 +162,39 @@ function readPanelCollapsed() {
   return localStorage.getItem(PANEL_COLLAPSED_STORAGE_KEY) === "true";
 }
 
+function slideIndexFromValue(value, slideCount) {
+  const match = String(value || "").trim().match(/^(?:#?slide-?)?0?(\d{1,2})$/i);
+  if (!match) return null;
+  const slideNumber = Number.parseInt(match[1], 10);
+  if (!Number.isInteger(slideNumber)) return null;
+  return Math.max(0, Math.min(slideNumber - 1, slideCount - 1));
+}
+
 function readCurrentSlideIndex(slideCount) {
+  localStorage.removeItem(LEGACY_CURRENT_SLIDE_STORAGE_KEY);
+
+  const hashIndex = slideIndexFromValue(window.location.hash, slideCount);
+  if (hashIndex !== null) return hashIndex;
+
+  const requestedSlide = new URLSearchParams(window.location.search).get("slide");
+  const queryIndex = slideIndexFromValue(requestedSlide, slideCount);
+  if (queryIndex !== null) {
+    return queryIndex;
+  }
+
   const stored = Number.parseInt(localStorage.getItem(CURRENT_SLIDE_STORAGE_KEY) || "0", 10);
   if (!Number.isInteger(stored)) return 0;
   return Math.max(0, Math.min(stored, slideCount - 1));
 }
 
-function writeCurrentSlideIndex(index) {
+function writeCurrentSlideIndex(index, slide) {
   localStorage.setItem(CURRENT_SLIDE_STORAGE_KEY, String(index));
+  if (!slide) return;
+  const nextHash = `#${slide.slideId}`;
+  if (window.location.hash === nextHash) return;
+  syncingLocation = true;
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}${nextHash}`);
+  syncingLocation = false;
 }
 
 function setPanelCollapsed(collapsed) {
@@ -239,12 +274,35 @@ function updateTime() {
   }
 }
 
+function seekToSliderValue({ keepSeeking = false } = {}) {
+  const duration = Number.isFinite(elements.audio.duration) ? elements.audio.duration : 0;
+  if (duration <= 0) {
+    elements.seek.value = "0";
+    updateTime();
+    seeking = keepSeeking;
+    return;
+  }
+
+  const ratio = Math.max(0, Math.min(Number(elements.seek.value) / 1000, 1));
+  const nextTime = ratio * duration;
+  elements.audio.currentTime = nextTime;
+  elements.elapsed.textContent = formatSeconds(nextTime);
+  elements.remaining.textContent = `-${formatSeconds(Math.max(duration - nextTime, 0))}`;
+  seeking = keepSeeking;
+}
+
+function finishSeeking() {
+  if (!seeking) return;
+  seeking = false;
+  updateTime();
+}
+
 function loadSlide(index, { autoplay = false, restart = true } = {}) {
   currentIndex = Math.max(0, Math.min(index, manifest.slides.length - 1));
-  writeCurrentSlideIndex(currentIndex);
   const slide = currentSlide();
+  writeCurrentSlideIndex(currentIndex, slide);
 
-  elements.image.src = rootPath(slide.imagePath);
+  elements.image.src = cacheBustedRootPath(slide.imagePath);
   elements.image.alt = `Slide ${slide.slideNumber}: ${slide.title}`;
   elements.slideCount.textContent = `Slide ${slide.slideNumber} of ${manifest.slides.length}`;
   elements.slideTitle.textContent = slide.title;
@@ -321,24 +379,22 @@ elements.feedback.addEventListener("input", () => {
   scheduleFeedbackSave();
 });
 
-elements.seek.addEventListener("input", () => {
+elements.seek.addEventListener("pointerdown", () => {
   seeking = true;
-  const duration = Number.isFinite(elements.audio.duration) ? elements.audio.duration : 0;
-  if (duration > 0) {
-    const nextTime = (Number(elements.seek.value) / 1000) * duration;
-    elements.elapsed.textContent = formatSeconds(nextTime);
-    elements.remaining.textContent = `-${formatSeconds(Math.max(duration - nextTime, 0))}`;
-  }
+});
+
+elements.seek.addEventListener("input", () => {
+  seekToSliderValue({ keepSeeking: true });
 });
 
 elements.seek.addEventListener("change", () => {
-  const duration = Number.isFinite(elements.audio.duration) ? elements.audio.duration : 0;
-  if (duration > 0) {
-    elements.audio.currentTime = (Number(elements.seek.value) / 1000) * duration;
-  }
-  seeking = false;
+  seekToSliderValue();
   updateTime();
 });
+
+elements.seek.addEventListener("pointerup", finishSeeking);
+elements.seek.addEventListener("keyup", finishSeeking);
+elements.seek.addEventListener("blur", finishSeeking);
 
 elements.audio.addEventListener("loadedmetadata", updateTime);
 elements.audio.addEventListener("timeupdate", updateTime);
@@ -365,6 +421,13 @@ window.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowLeft") {
     go(-1, { autoplay: !elements.audio.paused });
   }
+});
+
+window.addEventListener("hashchange", () => {
+  if (syncingLocation || !manifest?.slides?.length) return;
+  const hashIndex = slideIndexFromValue(window.location.hash, manifest.slides.length);
+  if (hashIndex === null || hashIndex === currentIndex) return;
+  loadSlide(hashIndex, { autoplay: !elements.audio.paused });
 });
 
 async function init() {

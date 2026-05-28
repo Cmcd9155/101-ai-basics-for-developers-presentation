@@ -3,9 +3,39 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..");
-const FEEDBACK_PATH = path.join(REPO_ROOT, "narration", "feedback.json");
-const FEEDBACK_EVENTS_PATH = path.join(REPO_ROOT, "narration", "feedback-events.jsonl");
-const REGENERATION_BRIEF_PATH = path.join(REPO_ROOT, "narration", "regeneration-brief.md");
+
+function parseArgs(argv) {
+  const args = { deck: "101" };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--deck") {
+      const next = argv[index + 1];
+      if (!next) throw new Error("--deck requires a presentation id, such as 101 or 102.");
+      args.deck = normalizeDeckId(next);
+      index += 1;
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+  return args;
+}
+
+function normalizeDeckId(value) {
+  const deckId = String(value || "101").trim();
+  if (!/^[a-zA-Z0-9_-]+$/.test(deckId)) {
+    throw new Error(`Invalid deck id: ${deckId}`);
+  }
+  return deckId;
+}
+
+function deckPaths(deckId) {
+  const root = path.join(REPO_ROOT, "presentations", normalizeDeckId(deckId));
+  return {
+    feedbackPath: path.join(root, "narration", "feedback.json"),
+    feedbackEventsPath: path.join(root, "narration", "feedback-events.jsonl"),
+    regenerationBriefPath: path.join(root, "narration", "regeneration-brief.md"),
+  };
+}
 
 function formatSlideLabel(slideId) {
   const number = Number(slideId.replace("slide-", ""));
@@ -47,10 +77,12 @@ function buildRegenerationBrief(feedback) {
 }
 
 async function main() {
-  const feedback = JSON.parse(await fs.readFile(FEEDBACK_PATH, "utf8"));
-  await fs.writeFile(REGENERATION_BRIEF_PATH, buildRegenerationBrief(feedback), "utf8");
+  const args = parseArgs(process.argv.slice(2));
+  const paths = deckPaths(args.deck);
+  const feedback = JSON.parse(await fs.readFile(paths.feedbackPath, "utf8"));
+  await fs.writeFile(paths.regenerationBriefPath, buildRegenerationBrief(feedback), "utf8");
   await fs.appendFile(
-    FEEDBACK_EVENTS_PATH,
+    paths.feedbackEventsPath,
     `${JSON.stringify({
       event: "feedback_artifacts_synced",
       updatedAt: new Date().toISOString(),
@@ -60,8 +92,8 @@ async function main() {
     })}\n`,
     "utf8",
   );
-  console.log(`Wrote ${path.relative(REPO_ROOT, REGENERATION_BRIEF_PATH)}`);
-  console.log(`Appended ${path.relative(REPO_ROOT, FEEDBACK_EVENTS_PATH)}`);
+  console.log(`Wrote ${path.relative(REPO_ROOT, paths.regenerationBriefPath)}`);
+  console.log(`Appended ${path.relative(REPO_ROOT, paths.feedbackEventsPath)}`);
 }
 
 main().catch((error) => {

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Basics for Developers | Presentations</title>
+    <link rel="stylesheet" href="/player/styles.css" />
+    <style>
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 32px;
+      }
+
+      .chooser {
+        width: min(960px, 100%);
+      }
+
+      .chooser h1 {
+        margin-bottom: 14px;
+        font-size: 44px;
+      }
+
+      .chooser p {
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.55;
+      }
+
+      .deck-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 34px;
+      }
+
+      .deck-card {
+        display: grid;
+        min-height: 210px;
+        padding: 24px;
+        color: inherit;
+        text-decoration: none;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 18px 52px rgba(28, 41, 64, 0.12);
+      }
+
+      .deck-card:hover {
+        border-color: var(--accent);
+      }
+
+      .deck-card h2 {
+        margin-bottom: 10px;
+        font-size: 26px;
+      }
+
+      .deck-card span {
+        align-self: end;
+        color: var(--accent-dark);
+        font-weight: 800;
+      }
+
+      @media (max-width: 760px) {
+        .deck-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="chooser">
+      <p class="eyebrow">AI Basics for Developers</p>
+      <h1>Presentation Library</h1>
+      <p>Choose a narrated workshop deck. Each deck remembers its current slide independently, so refresh keeps you where you were.</p>
+      <section class="deck-grid" aria-label="Available presentations">
+        <a class="deck-card" href="/presentations/101/player/">
+          <div>
+            <p class="eyebrow">101</p>
+            <h2>AI Basics for Developers</h2>
+            <p>LLM basics, context, tools, retrieval, agent modes, task selection, steering, and verification.</p>
+          </div>
+          <span>Open 101</span>
+        </a>
+        <a class="deck-card" href="/presentations/102/player/">
+          <div>
+            <p class="eyebrow">102</p>
+            <h2>Agent Harnesses</h2>
+            <p>Copilot instructions, skills, team habits, safe scripts, soft checks, and post-generation review.</p>
+          </div>
+          <span>Open 102</span>
+        </a>
+      </section>
+    </main>
+  </body>
+</html>

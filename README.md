@@ -1,30 +1,30 @@
-# 101 AI Basics for Developers
+# AI Basics for Developers Presentations
 
-Practical 30-minute workshop deck for engineers learning how to use AI agents in IDE workflows, especially VS Code and GitHub Copilot.
+Presentation library for practical developer workshops on AI coding agents, VS Code, and GitHub Copilot.
 
-## Deliverables
+## Decks
 
-- Editable PowerPoint: [`deck/101-ai-basics-for-developers.pptx`](deck/101-ai-basics-for-developers.pptx)
-- PDF export: [`deck/101-ai-basics-for-developers.pdf`](deck/101-ai-basics-for-developers.pdf)
-- Speaker notes: [`deck/101-ai-basics-speaker-notes.md`](deck/101-ai-basics-speaker-notes.md)
-- Slide previews: [`previews/`](previews/)
-- Contact sheet: [`qa/contact-sheet.png`](qa/contact-sheet.png)
-- Generated supporting visuals: [`assets/`](assets/)
-- Narration script, audio, and player manifest: [`narration/`](narration/)
-- Local narrated player: [`player/`](player/)
-- Presentation source modules: [`source/slides/`](source/slides/)
+### 101 AI Basics for Developers
+
+Practical fundamentals for engineers learning how to use IDE agents without losing engineering judgment.
+
+- Editable PowerPoint: [`presentations/101/deck/101-ai-basics-for-developers.pptx`](presentations/101/deck/101-ai-basics-for-developers.pptx)
+- PDF export: [`presentations/101/deck/101-ai-basics-for-developers.pdf`](presentations/101/deck/101-ai-basics-for-developers.pdf)
+- Speaker notes: [`presentations/101/deck/101-ai-basics-speaker-notes.md`](presentations/101/deck/101-ai-basics-speaker-notes.md)
+- Narration/player data: [`presentations/101/narration/`](presentations/101/narration/)
+
+### 102 Agent Harnesses
+
+Sequel deck on keeping Copilot useful, bounded, and reviewable with repo/team harnesses: rules, moves, tools, and checks.
+
+- Editable PowerPoint: [`presentations/102/deck/102-agent-harnesses.pptx`](presentations/102/deck/102-agent-harnesses.pptx)
+- PDF export: [`presentations/102/deck/102-agent-harnesses.pdf`](presentations/102/deck/102-agent-harnesses.pdf)
+- Speaker notes: [`presentations/102/deck/102-agent-harnesses-speaker-notes.md`](presentations/102/deck/102-agent-harnesses-speaker-notes.md)
+- Narration/player data: [`presentations/102/narration/`](presentations/102/narration/)
 
 ## Run Locally
 
-This repo includes the rendered deck artifacts and the generated Ara narration
-audio, so you can run the presentation player without regenerating anything.
-
-Requirements:
-
-- Node.js 22 or newer
-- GitHub push access if you want Additional notes to sync back to the repo
-
-Start the player:
+Start the presentation chooser:
 
 ```bash
 npm run player:serve -- --port 4173
@@ -33,61 +33,35 @@ npm run player:serve -- --port 4173
 Open:
 
 ```text
-http://127.0.0.1:4173/player/
+http://127.0.0.1:4173/
 ```
 
-The player reads slide previews from `previews/`, audio from
-`narration/audio/`, and timing from `narration/manifest.json`.
+The chooser links to:
 
-Additional notes typed in the player are saved to:
+- `http://127.0.0.1:4173/presentations/101/player/`
+- `http://127.0.0.1:4173/presentations/102/player/`
 
-- `narration/feedback.json`
-- `narration/feedback-events.jsonl`
-- `narration/regeneration-brief.md`
+Each deck stores its current slide separately, so refreshing keeps you on the same presentation and slide.
 
-When the player is served from this repo, saving Additional notes also commits
-and pushes just those notes artifacts to the current Git branch.
-
-Useful checks:
+## Useful Commands
 
 ```bash
+npm run build:101
+npm run build:102
 npm run narration:dry-run
+npm run narration:generate
 npm run feedback:sync
 ```
 
-## Workshop Arc
+The default narration and feedback commands target 102. Use the `:101` variants for the 101 deck.
 
-1. Why IDE agents matter now
-2. LLM basics: tokens, context, and uncertainty
-3. Prompting as specification
-4. How Copilot traverses a repo
-5. Context engineering
-6. Tool calling
-7. Retrieval and RAG
-8. MCP
-9. Workflows vs agents
-10. IDE agent modes
-11. Good tasks vs bad tasks
-12. Steering agents
-13. Failure modes
-14. Team setup
-15. Practical checklist
-16. Closing exercise
+## Source
 
-## Notes
+Both decks were authored with the Codex Presentations skill using artifact-tool presentation JSX.
 
-The deck is designed for professional developers with mixed AI familiarity. It frames GitHub Copilot as the primary mental model while keeping the patterns transferable to Codex, Cursor, Claude Code, and other agentic IDE tools.
+- 101 source: [`presentations/101/source/`](presentations/101/source/)
+- 102 source: [`presentations/102/source/`](presentations/102/source/)
+- Shared player: [`player/`](player/)
+- Shared scripts: [`scripts/`](scripts/)
 
-Generated images were created with xAI Grok Imagine using the Companion repo's configured API access. No API keys or local environment files are included in this repository.
-
-## Primary Sources
-
-- GitHub Docs: repository indexing for Copilot Chat
-- GitHub Docs: Copilot context management
-- GitHub Docs: Copilot agent sessions
-- GitHub Docs: Copilot response customization
-- OpenAI Docs: function calling
-- OpenAI Docs: retrieval and vector stores
-- Model Context Protocol specification: tools
-- Anthropic: Building Effective Agents
-- xAI Docs: image generation
+Generated images use the same Grok Imagine asset-generation pattern as the 101 deck. Local `.env` files and API keys are not committed.

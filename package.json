@@ -1,13 +1,18 @@
 {
-  "name": "101-ai-basics-for-developers-presentation",
+  "name": "ai-basics-for-developers-presentations",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "narration:dry-run": "node scripts/generate-ara-narration.mjs --dry-run",
-    "narration:generate": "node scripts/generate-ara-narration.mjs --all",
-    "narration:regenerate": "node scripts/generate-ara-narration.mjs --all --force",
-    "feedback:sync": "node scripts/sync-feedback-artifacts.mjs",
+    "build:101": "node scripts/build-deck.mjs --deck 101",
+    "build:102": "node scripts/build-deck.mjs --deck 102",
+    "narration:dry-run": "node scripts/generate-ara-narration.mjs --deck 102 --dry-run",
+    "narration:generate": "node scripts/generate-ara-narration.mjs --deck 102 --all",
+    "narration:regenerate": "node scripts/generate-ara-narration.mjs --deck 102 --all --force",
+    "narration:dry-run:101": "node scripts/generate-ara-narration.mjs --deck 101 --dry-run",
+    "narration:generate:101": "node scripts/generate-ara-narration.mjs --deck 101 --all",
+    "feedback:sync": "node scripts/sync-feedback-artifacts.mjs --deck 102",
+    "feedback:sync:101": "node scripts/sync-feedback-artifacts.mjs --deck 101",
     "player:serve": "node scripts/serve-player.mjs"
   }
 }

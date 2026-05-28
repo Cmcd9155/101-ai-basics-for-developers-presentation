@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-21T19:41:43.346Z",
+  "slides": {
+    "slide-01": "- not perfect\n\n- AI guided learning\n\n-mix Vscode + Pres + demo",
+    "slide-03": "can we add highlights during the conversation",
+    "slide-05": "- Helix Agent (Curated Starter Pack)",
+    "slide-06": "- Show tools on vscode",
+    "slide-07": "RAG != reliable info",
+    "slide-08": "CLI/Tools != MCP\n\nMCP != Tool !== Skill != CLI\n- Major Goal give AI ability to do actions",
+    "slide-09": "Agents == Adaptation/Action\n\nWorkflows == Sequential basic actions",
+    "slide-10": "No one uses Ask/Edit mode\n\nPlan/Agent mode + grill-me\n\nPLAN first (critical)!",
+    "slide-11": "Agent work should be agile == small verifiable tasks",
+    "slide-12": "vscode steering in your plan was not perfect, you orchestrate\n\ninterrupt, monitor\n\nHuge developer value",
+    "slide-13": "90% of AI work is catching hallucination or creating barriers to prevent it\n\nAirplane analogy",
+    "slide-14": "Critical: Repos with strong AI boundaries == good\n\nScripts, Skills, Copilot Instructions",
+    "slide-15": "Deep thought before feature, critical\n\nshape, watch, prove",
+    "slide-02": "vsCode show context"
+  }
+}

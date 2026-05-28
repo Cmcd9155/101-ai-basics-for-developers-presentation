@@ -1,0 +1,50 @@
+[
+  {
+    "name": "hero-agent-harnesses.png",
+    "status": "grok"
+  },
+  {
+    "name": "prompt-to-harness.png",
+    "status": "grok"
+  },
+  {
+    "name": "rules-moves-tools-checks.png",
+    "status": "grok"
+  },
+  {
+    "name": "copilot-instructions-operating-manual.png",
+    "status": "grok"
+  },
+  {
+    "name": "blast-radius-boundaries.png",
+    "status": "grok"
+  },
+  {
+    "name": "skills-playbooks.png",
+    "status": "grok"
+  },
+  {
+    "name": "team-habits.png",
+    "status": "grok"
+  },
+  {
+    "name": "runnable-scripts.png",
+    "status": "grok"
+  },
+  {
+    "name": "soft-checks.png",
+    "status": "grok"
+  },
+  {
+    "name": "post-generation-review.png",
+    "status": "grok"
+  },
+  {
+    "name": "harness-learning-loop.png",
+    "status": "grok"
+  },
+  {
+    "name": "inspectable-work.png",
+    "status": "grok"
+  }
+]

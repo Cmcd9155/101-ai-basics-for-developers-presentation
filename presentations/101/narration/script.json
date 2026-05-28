@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "title": "101 AI Basics for Developers",
+  "voice": {
+    "provider": "xai",
+    "voiceId": "ara",
+    "language": "en",
+    "style": "Warm, conversational, technically sharp, lightly funny, and paced for a 20-minute developer workshop."
+  },
+  "timing": {
+    "targetTotalSeconds": 1180,
+    "acceptableMinSeconds": 1140,
+    "acceptableMaxSeconds": 1260
+  },
+  "slides": [
+    {
+      "slideId": "slide-01",
+      "slideNumber": 1,
+      "title": "101 AI Basics for Developers",
+      "targetSeconds": 45,
+      "captionText": "This is a fundamentals-first workshop for developers who want AI coding to feel more understandable, immersive, and fun without turning off engineering judgment.",
+      "ttsText": "Alright, welcome to one oh one AI Basics for Developers. So, quick promise up front: this is not going to be a big theory lecture. We are not spending twenty minutes trapped inside a transformer diagram. This is much more practical than that. Think of it as a fundamentals workshop for using GitHub Copilot without turning off your engineering brain. The goal is to make AI coding feel a little less mysterious, a little more immersive, and honestly, more fun. We are going to talk about what to ask, what context to give it, how to check the work, and when to say, okay, no, we are not rewriting auth today. If you deal with deadlines, legacy code, flaky tests, and docs that are mostly telling the truth, you are in the right room. By the end, I want you to feel like you understand the basics well enough to use Copilot with more confidence, more curiosity, and a lot more control."
+    },
+    {
+      "slideId": "slide-02",
+      "slideNumber": 2,
+      "title": "LLM Basics",
+      "targetSeconds": 70,
+      "captionText": "LLMs read tokens, use the context they have, and draft a likely answer. Useful can still be wrong, so verify the important parts.",
+      "ttsText": "Okay, let me make this slide really simple, because this is the part that makes everything else less mysterious. [pause] An LLM does not look at your project the way you do. It reads little pieces of text called tokens. That can be a word, part of a word, a bracket, a slash, a variable name, whatever. [pause] Then it uses the context it has right now. Your prompt is context. Selected code is context. Tool results are context. Earlier messages are context. But, and this is the important part, it only has what made it into the room. It may not have the one file, test, or API detail that would change the answer. [pause] So what is it doing with that context? It is making a very educated next-text guess. Actually, let me say that less weirdly: it is drafting the answer that looks most likely from the evidence it can see. [pause] That is why it can be genuinely helpful and still be wrong. The confidence is part of the delivery, not proof. So your move is not to distrust everything. That is exhausting. Your move is to use it like a fast draft from someone who has not seen the whole repo yet. Let it explain. Let it suggest. Let it get you unstuck. Then check the important parts against the actual code, the tests, the docs, and your own judgment."
+    },
+    {
+      "slideId": "slide-03",
+      "slideNumber": 3,
+      "title": "Prompting as Specification",
+      "targetSeconds": 70,
+      "captionText": "A good agent prompt is just a clearer ticket: what to fix, where to look, what to avoid, how to check it, and what done means.",
+      "ttsText": "Okay, let us make this really practical. A prompt is not a magic phrase. [pause] It is just a clearer work ticket for the agent. [long-pause] The weak version is: fix auth bug. And look, we have all written tickets like that. I have written tickets like that. But for an agent, that is too open-ended. It has to guess what bug, where to look, how much to change, and how to know it is finished. [long-pause] A better version says: find why expired sessions still pass slash api slash me. Start in the auth middleware and session tests. Make the smallest fix. Update tests. Summarize what changed. [long-pause] That is easier to follow because it answers five simple questions. [pause] What should change? [pause] Where should I start? [pause] What should I avoid changing? [pause] How do we check it? [pause] And what counts as done? [long-pause] That is the whole move. You are not trying to impress the model. You are giving it a small, reviewable job. The clearer the ticket, the less the agent has to guess."
+    },
+    {
+      "slideId": "slide-04",
+      "slideNumber": 4,
+      "title": "How Copilot Traverses a Repo",
+      "targetSeconds": 95,
+      "captionText": "Copilot does not carry the whole repo into the model. It packs a smaller working context from files, search results, tool output, and the chat.",
+      "ttsText": "Now the repo question. This is where people build the wrong picture in their head. They imagine Copilot taking the whole repo, dropping it into the model, and saying, okay, figure it out. [pause] That is not the useful mental model. [long-pause] A better picture is this: Copilot packs a working context. Not the whole repo. More like a small backpack of the things it can use right now. [long-pause] Some of that comes from what you point at: opened files, selected code, the issue, logs, instructions. [pause] Some comes from search: related files, symbols, tests, docs, patterns that look connected. [pause] And some comes from tools: search output, test failures, diffs, errors, and what already happened in the chat. [long-pause] Here is why that matters. If the right file never gets packed, the answer can sound totally reasonable and still be wrong for your actual repo. That is not always a smartness problem. A lot of the time, it is a context problem. [pause] That is why an agent can look brilliant on one task and weirdly lost on the next. Same model, different backpack. It may simply be missing the clue a human teammate would have opened first. [long-pause] So when the work matters, ask for the map before edits. What files did you inspect? What tests did you find? What are you assuming? Where is the risk? [pause] That little map is not busywork. It is how you catch the wrong turn before it becomes a confident diff."
+    },
+    {
+      "slideId": "slide-05",
+      "slideNumber": 5,
+      "title": "Context Engineering",
+      "targetSeconds": 80,
+      "captionText": "Context engineering means building a small starter packet: the ask, the evidence, the rules, and the check.",
+      "ttsText": "This is the habit that makes agents feel much less random. Context engineering sounds fancy, but for developers it can be very plain: make the right starter packet. [long-pause]\n\nNot the entire repo. Not a giant paste of every thought you have. Just the few things that help the agent make the next good decision. [pause]\n\nI like to think about four pieces. First, the ask. What should change, and what should stay alone? [pause]\n\nSecond, the evidence. The exact file, the failing log, the screenshot, the stack trace, the issue text. The stuff a teammate would ask for before touching code. [pause]\n\nThird, the rules. Use this test helper. Do not edit generated files. Keep the public API stable. Start in this package. Those little rules prevent a lot of wandering. [pause]\n\nAnd fourth, the check. How do we know it worked? Which test should pass? What behavior should I see? What counts as done? [long-pause]\n\nActually, let me say that more simply: good context is not more stuff. Good context is the stuff that changes the next decision. [pause]\n\nSo start narrow. Give the agent a clean packet. Let it inspect, search, and ask for more when it needs more. That keeps the session understandable, and it keeps you in control of the work instead of watching the agent confidently explore the wrong neighborhood."
+    },
+    {
+      "slideId": "slide-06",
+      "slideNumber": 6,
+      "title": "Tool Calling",
+      "targetSeconds": 95,
+      "captionText": "Tool calling is a loop: the model asks, the host app runs the tool, the result comes back, and the model decides what to do next.",
+      "ttsText": "Tool calling is the moment an agent stops only talking and starts checking the world. [pause]\n\nBut the important part is simpler than the name sounds. The model does not run your tools by itself. It asks. [pause]\n\nThen the host app, your IDE, your agent runtime, whatever is actually holding the permissions, runs the tool outside the model. It might search files. It might run a test. It might open a browser. It might query a database. [pause]\n\nThen the result comes back into the conversation as context. The model reads that result and decides what to do next. Answer, ask for another tool, change a file, run a narrower test. That is the loop. [long-pause]\n\nActually, this is the sentence I want you to keep: the model is not running tests in its imagination. The host runs the command and gives the model the output. [pause]\n\nThat is why tools make agents so much more useful. They give the model evidence. Not vibes. Evidence. A real error message. A real diff. A real test result. [long-pause]\n\nBut tools also have blast radius. Reading a file is low risk. Editing code is higher. Running a migration is higher. Pushing or deploying is obviously higher. [pause]\n\nSo when you give an agent tools, think like an engineer. What can it read? What can it change? What can it execute? What needs approval? [pause]\n\nAnd when a tool result is surprising, slow down. Surprising output is evidence, not an instruction to sprint. The right question is not just, did the agent use tools? The right question is, did those tool results actually support the next decision?"
+    },
+    {
+      "slideId": "slide-07",
+      "slideNumber": 7,
+      "title": "RAG and Semantic Search",
+      "targetSeconds": 90,
+      "captionText": "Retrieval finds candidate files, docs, and snippets by meaning. It helps you get oriented, but developers still need to read and verify the source.",
+      "ttsText": "RAG sounds like a big architecture word, but the everyday idea is simple: before the model answers, go fetch relevant stuff. [pause]\n\nIn developer tools, that usually means search over your repo or docs. Sometimes it is keyword search. Often it is semantic search, which means the system is trying to find things that mean the same thing as your question, even if the words are different. [pause]\n\nThat is useful when you do not know the file name, or when the answer is hiding in a test, a config file, or a doc page you would not have opened first. [long-pause]\n\nBut keep this straight: retrieval is not truth. Retrieval is a candidate list. [pause]\n\nA retrieved chunk can be stale. It can be from the nearby feature, not this feature. It can be from an old API path. It can be the right-looking function that is not actually called anymore. [pause]\n\nSo do not treat citations like magic proof. Treat them like leads. Open the file. Read the caller. Check the test. Look at the active route or config. [long-pause]\n\nThe workflow is: retrieve, read, reason, verify. [pause]\n\nRetrieve gets you oriented. Read tells you what the source actually says. Reason connects it to the task. Verify checks that the answer survives the real code, the docs, or the test. [pause]\n\nOne good habit is to ask the agent to separate found evidence from inferred conclusions. What did it actually find? What is it guessing from that evidence? That separation makes retrieval much safer."
+    },
+    {
+      "slideId": "slide-08",
+      "slideNumber": 8,
+      "title": "MCP",
+      "targetSeconds": 80,
+      "captionText": "MCP gives agents a standard way to discover and use tool servers. It standardizes the plug, but the host still owns permissions and trust.",
+      "ttsText": "MCP stands for Model Context Protocol. The simplest way to think about it is this: MCP is a standard plug for agent tools. [pause]\n\nWithout a standard, every integration can feel custom. One app has its own way to reach GitHub. Another has a database helper. Another has a docs search endpoint. The agent might use all of them, but the shape is different every time. [pause]\n\nMCP makes that shape more consistent. A server can say, here are the tools I offer. Here are the names. Here are the arguments. Here is what I return. Here are the resources I can expose. [long-pause]\n\nThat helps teams because capabilities become easier to discover, reuse, and review. One maintained tool server for tickets, docs, deploys, or data is easier to reason about than five agents inventing their own access pattern. [pause]\n\nBut MCP is not automatic trust. Actually, let me say that more plainly: MCP standardizes the plug. It does not decide who gets the keys. [long-pause]\n\nThe host still decides what tools are allowed. Your organization still decides what needs approval. Reading docs is one thing. Changing production data is another. Deploying is another. [pause]\n\nSo a good MCP setup is boring in a healthy way: clear tool names, narrow permissions, useful logs, and review for risky actions. MCP helps integrations scale, but the safety model still belongs to the system around it."
+    },
+    {
+      "slideId": "slide-09",
+      "slideNumber": 9,
+      "title": "Workflow vs Agent",
+      "targetSeconds": 75,
+      "captionText": "Use workflows when the path is known and repeatable. Use agents when the path must be discovered through exploration, tools, and judgment.",
+      "ttsText": "This distinction is worth keeping really clean: workflows are for known paths. Agents are for discovered paths. [pause]\n\nA workflow is like a recipe. Step one, read the merged pull requests. Step two, group the changes. Step three, draft release notes. Step four, ask for review. Same shape every time. [pause]\n\nThat is great when you want predictability. Workflows are easier to test. Easier to audit. Usually cheaper. And honestly, less dramatic. [long-pause]\n\nAn agent is different. An agent is useful when the next step depends on what it finds. Why did checkout latency spike? Why is this test flaky? Which files own this behavior? That kind of task may need logs, diffs, search, tests, and a few wrong turns before the path becomes clear. [pause]\n\nActually, the decision question is simple: do we know the path already, or is discovering the path part of the work? [long-pause]\n\nIf the path is known, use a workflow. If discovery matters, use an agent. And either way, keep verification in the loop. [pause]\n\nThe trap is calling everything an agent because it sounds more advanced. But if the task is predictable, an agent may just add cost and weirdness. Save agents for work where adaptation is actually valuable."
+    },
+    {
+      "slideId": "slide-10",
+      "slideNumber": 10,
+      "title": "IDE Agent Modes",
+      "targetSeconds": 90,
+      "captionText": "Choose the mode that keeps review possible. More autonomy means more blast radius, so scope, tests, permissions, and rollback should drive the choice.",
+      "ttsText": "IDE agent modes are basically blast-radius controls. [pause]\n\nAsk mode is for understanding. Explain this file. Compare these approaches. Find the likely owner. No edits. Very low risk. [pause]\n\nEdit mode is for a targeted change when you already know the surface. This component. This test. This small bug. You are keeping the work inside a box you can review. [pause]\n\nAgent mode is for work where exploration is part of the job. Search the repo, inspect files, make changes, run tests, react to errors, try again. That is powerful, but the surface area is bigger. [long-pause]\n\nPlan mode is for foggy or high-risk scope. Before touching code, ask it to map the work, name the files, name the tests, and call out the risks. [pause]\n\nActually, here is the simpler rule: choose the mode that keeps review possible. [pause]\n\nMore autonomy is not automatically better. It is just more blast radius. If the task is small and the tests are clear, more autonomy can help. If the task touches auth, billing, migrations, or production behavior, slow the dial down. [long-pause]\n\nBefore you turn the dial up, ask three questions. Is the scope clear? Are the tests clear? Is it easy to revert? [pause]\n\nIf those answers are weak, stay in ask or plan mode. If they are strong, edit or agent mode can be a great fit. Increase autonomy only when your verification story improves with it."
+    },
+    {
+      "slideId": "slide-11",
+      "slideNumber": 11,
+      "title": "Task Selection",
+      "targetSeconds": 80,
+      "captionText": "Good agent tasks are small enough to inspect, clear enough to verify, and bounded enough to review in one sitting.",
+      "ttsText": "Task selection is where a lot of agent sessions are won or lost. [pause]\n\nThe question is not, can the model technically try this? It can try almost anything. The better question is, can I review what it does in one sitting? [pause]\n\nGood agent work has a small surface. One component. One route. One failing test area. One behavior. It also has a clear check: a test, a log line, a screenshot, a manual behavior, something that tells you whether the change worked. [pause]\n\nAnd it should produce a readable diff. That part matters. If the agent touches twelve unrelated files and you cannot explain why, the task was probably too wide. [long-pause]\n\nSo when you hear a request like, make this production ready, or fix all flaky tests, or rewrite the architecture, do not throw that straight at the agent. Actually, let me say that more simply: those may be real goals, but they are not single agent tasks. [pause]\n\nSplit until each task has one behavior, one area, and one verification. First identify the flaky tests. Then group them by likely cause. Then fix one group with a focused test run. [pause]\n\nThat is the move. Big goal, small inspectable task, agent session, human review. If you cannot review the diff, you did not delegate a task. You delegated a cloud of work and hoped it would become software."
+    },
+    {
+      "slideId": "slide-12",
+      "slideNumber": 12,
+      "title": "Steering Loop",
+      "targetSeconds": 90,
+      "captionText": "You are still the engineer. Frame the task, watch the agent's moves, interrupt drift early, and verify the result.",
+      "ttsText": "This slide is the operating loop for a live agent session. [pause]\n\nYou are still the engineer. The agent is the worker, not the reviewer. So your job is not to stare at every token, and it is not to disappear until the end. Your job is to stay in the loop. [pause]\n\nFirst, frame the work. Give the goal, the scope, the starting files, and the constraints. This is where you tell it what good looks like, and what not to touch. [pause]\n\nThen watch the shape of the session. Is it reading the right files? Is it running a useful command? Is it making assumptions? Is it checking the thing you actually care about? You do not need to micromanage every sentence. You do need to notice direction. [long-pause]\n\nThen interrupt drift early. Actually, that is the whole trick. Interrupt while the mistake is still cheap. Wrong files, no tests, surprise scope, uncited claims: those are steering moments. A quick correction after two tool calls is normal. A correction after ten files changed is a review problem. [pause]\n\nFinally, verify. Read the diff. Run the test or the manual check. Ask what it did not verify. Ask for residual risk in plain language. [pause]\n\nThat is how agent sessions become reliable. Not because the model suddenly deserves blind trust, and not because you hover over it nervously. Reliability comes from active steering: clear frame, visible work, early correction, real verification."
+    },
+    {
+      "slideId": "slide-13",
+      "slideNumber": 13,
+      "title": "Failure Modes",
+      "targetSeconds": 85,
+      "captionText": "Confidence is not verification. When an agent sounds sure, check evidence, scope, freshness, tests, permissions, and residual risk.",
+      "ttsText": "Failure modes are easier to handle if we make them boring. [pause]\n\nThe big idea is simple: confidence is not a check. Evidence is. An agent can sound calm, specific, and very professional while still being wrong about your repo. [pause]\n\nThe first failure is the invented API. The model knows the shape of a library, but not the exact helper your project has. So ask for the local symbol, the docs, or the file it used before you trust the code. [pause]\n\nThe second is the wide diff. That usually means the boundary was soft. If it changes shared types, public APIs, or unrelated files, slow down and narrow the task. [pause]\n\nThe third is stale context. Long sessions drift. Requirements change. A file gets missed. Sometimes the right move is not another prompt. It is a checkpoint, a summary, or a fresh session. [long-pause]\n\nThen there is weak verification. A passing test is helpful only if it checks the behavior you care about. And a manual check is only helpful if someone actually says what they checked. [pause]\n\nFinally, permissions. Tools can touch files, run commands, query services, or deploy things. Keep risky actions gated. The tool should not have more power than the task deserves. [pause]\n\nActually, here is the practical review habit: ask four questions. What evidence did you use? What changed? What did you verify? What risk remains? [pause]\n\nThose questions turn a confident answer into something you can inspect."
+    },
+    {
+      "slideId": "slide-14",
+      "slideNumber": 14,
+      "title": "Team Setup",
+      "targetSeconds": 80,
+      "captionText": "Repo instructions are a small operating manual. Write down the durable rules agents should not have to guess every session.",
+      "ttsText": "Team setup is where this stops being a cool demo and starts becoming a repeatable practice. [pause]\n\nRepo instructions are basically an operating manual. Not a giant policy document. Not a philosophy essay. A small set of rules the agent should not have to guess every session. [pause]\n\nStart with repo rules. Which package manager do we use? What commands are safe? Are generated files edited directly, or regenerated? Is there a shared API wrapper? Are there conventions for errors, logging, or environment variables? [pause]\n\nThen add path rules where they matter. The frontend may have different patterns than the API. Migrations may have different safety rules than tests. Security-sensitive code may need a stricter review path. Put that guidance near the work if your tooling supports it. [long-pause]\n\nWorkflow recipes are useful too. How do we triage a bug? How do we prepare a code review summary? How do we write release notes? If the team repeats a workflow, the agent can learn the shape of that workflow from a skill or prompt file. [pause]\n\nAnd please include the keep-out zones. Secrets. Dangerous commands. Deploys. Generated artifacts. Public APIs that should not move casually. [pause]\n\nActually, the test is simple: does this instruction change a decision? If yes, keep it. If it is just vibes, delete it. Short, durable instructions make every future session less guessy, for humans and agents."
+    },
+    {
+      "slideId": "slide-15",
+      "slideNumber": 15,
+      "title": "Practical Checklist",
+      "targetSeconds": 80,
+      "captionText": "Use one checklist for every agent session: before, shape the task; during, watch direction; after, prove it worked.",
+      "ttsText": "Here is the checklist I want people to actually use. [pause]\n\nBefore the session, shape the task. Define done. Bound the scope. Name the checks. That means the agent should know what success looks like, what files or areas are in play, and how you plan to tell whether it worked. [long-pause]\n\nDuring the session, watch direction. You are looking for the shape of the work, not every word. Read the plan. Notice which files it opens. Notice which tools it runs. If it starts drifting, interrupt while the correction is still small. [pause]\n\nAfter the session, prove it worked. Inspect the diff. Run the tests or the manual QA that matters. Ask what it did not verify. And if the agent learned something durable about the repo, capture it in instructions or a prompt file so the next session starts smarter. [long-pause]\n\nActually, the checklist is just three verbs: shape, watch, prove. Shape the task before. Watch direction during. Prove the work after. [pause]\n\nThis is where teams get calmer reviews. The goal is not to make every agent session perfect. The goal is to keep mistakes small, visible, and easy to correct."
+    },
+    {
+      "slideId": "slide-16",
+      "slideNumber": 16,
+      "title": "Closing Exercise",
+      "targetSeconds": 80,
+      "captionText": "The closing habit is simple: rewrite vague work into a bounded, testable task with goal, scope, start, limits, and a check.",
+      "ttsText": "Let us close with the move I want you to take back to your team. [pause]\n\nWhen you see a vague request, do not hand it directly to an agent. Rewrite it first. The prompt is the work ticket. Make it bounded and checkable. [pause]\n\nSo, make the settings page better becomes something like this: improve settings-page accessibility and spacing only. Start in the settings page component. Do not change routes or API behavior. Add focused tests. Summarize before and after, and name any remaining risk. [long-pause]\n\nThat rewrite is not magic language. It is just engineering shape. It has a goal. It has scope. It has a starting point. It has limits. It has a check. [pause]\n\nActually, that is the whole workshop in one habit: goal, scope, start, limits, check. If a request has those five things, an agent has a much better chance of helping without making a mess. [pause]\n\nAnd you still review it. You still run the tests. You still use judgment. The win is that the work is smaller, the diff is easier to read, and the conversation with the agent is easier to steer. [pause]\n\nGood agent work is bounded, testable, and reviewed. If your team practices only that, you will get better output, smaller diffs, and calmer reviews. Thanks for listening."
+    }
+  ]
+}
